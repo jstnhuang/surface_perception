@@ -20,7 +20,10 @@ Segmentation::Segmentation()
     : cloud_(),
       indices_(new pcl::PointIndices),
       horizontal_tolerance_degrees_(10),
-      margin_above_surface_(0.005) {}
+      margin_above_surface_(0.005),
+      cluster_distance_(0.01),
+      min_cluster_size_(10),
+      max_cluster_size_(10000) {}
 
 void Segmentation::set_input_cloud(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud) {
@@ -31,6 +34,9 @@ void Segmentation::set_indices(pcl::PointIndices::Ptr indices) {
   indices_ = indices;
 }
 
+void Segmentation::set_horizontal_tolerance_degrees(double degrees) {
+  horizontal_tolerance_degrees_ = degrees;
+}
 void Segmentation::set_margin_above_surface(double margin) {
   margin_above_surface_ = margin;
 }

@@ -1,5 +1,8 @@
 #include <vector>
 
+#include "Eigen/Eigen"
+#include "pcl/common/common.h"
+#include "pcl/filters/crop_box.h"
 #include "pcl_conversions/pcl_conversions.h"
 #include "ros/ros.h"
 #include "sensor_msgs/PointCloud2.h"
@@ -12,8 +15,41 @@ using surface_perception::SurfaceObjects;
 void Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   PointCloudC::Ptr pcl_cloud(new PointCloudC);
   pcl::fromROSMsg(*cloud, *pcl_cloud);
+
+  std::vector<int> indices;
+  pcl::removeNaNFromPointCloud(*pcl_cloud, *pcl_cloud, indices);
+
+  pcl::PointIndices::Ptr point_indices(new pcl::PointIndices);
+  pcl::CropBox<PointC> crop;
+  crop.setInputCloud(pcl_cloud);
+  Eigen::Vector4f min;
+  min << 0, -1, 0.3, 1;
+  crop.setMin(min);
+  Eigen::Vector4f max;
+  max << 1, 1, 2, 1;
+  crop.setMax(max);
+  crop.filter(point_indices->indices);
+
+  double horizontal_tolerance_degrees;
+  ros::param::param("horizontal_tolerance_degrees",
+                    horizontal_tolerance_degrees, 10.0);
+  double margin_above_surface;
+  ros::param::param("margin_above_surface", margin_above_surface, 0.005);
+  double cluster_distance;
+  ros::param::param("cluster_distance", cluster_distance, 0.01);
+  int min_cluster_size;
+  ros::param::param("min_cluster_size", min_cluster_size, 10);
+  int max_cluster_size;
+  ros::param::param("max_cluster_size", max_cluster_size, 10000);
+
   surface_perception::Segmentation seg;
   seg.set_input_cloud(pcl_cloud);
+  seg.set_indices(point_indices);
+  seg.set_horizontal_tolerance_degrees(horizontal_tolerance_degrees);
+  seg.set_margin_above_surface(margin_above_surface);
+  seg.set_cluster_distance(cluster_distance);
+  seg.set_min_cluster_size(min_cluster_size);
+  seg.set_max_cluster_size(max_cluster_size);
 
   std::vector<SurfaceObjects> surface_objects;
   bool success = seg.Segment(&surface_objects);
