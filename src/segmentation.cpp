@@ -73,7 +73,7 @@ bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
 
 bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
                  double horizontal_tolerance_degrees, Surface* surface) {
-  pcl::PointIndices indices_internal;
+  pcl::PointIndices::Ptr indices_internal(new pcl::PointIndices);
   pcl::SACSegmentation<PointC> seg;
   seg.setOptimizeCoefficients(true);
   seg.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
@@ -89,10 +89,14 @@ bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   seg.setEpsAngle(pcl::deg2rad(horizontal_tolerance_degrees));
 
   surface->coefficients.reset(new pcl::ModelCoefficients);
-  seg.segment(indices_internal, *surface->coefficients);
+  seg.segment(*indices_internal, *surface->coefficients);
   if (surface->coefficients->values.size() < 4) {
     return false;
   }
+
+  surface->pose_stamped.header.frame_id = cloud->header.frame_id;
+  FitBox(cloud, indices_internal, surface->coefficients,
+         &surface->pose_stamped.pose, &surface->dimensions);
   return true;
 }
 
@@ -116,15 +120,15 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
       size_t index = indices->indices[i];
       const PointC& pt = cloud->points[index];
       float val = a * pt.x + b * pt.y + c * pt.z + d;
-      if (val <= margin_above_surface) {
-        above_surface_indices->indices.push_back(i);
+      if (val >= margin_above_surface) {
+        above_surface_indices->indices.push_back(index);
       }
     }
   } else {
     for (size_t i = 0; i < cloud->size(); ++i) {
       const PointC& pt = cloud->points[i];
       float val = a * pt.x + b * pt.y + c * pt.z + d;
-      if (val <= margin_above_surface) {
+      if (val >= margin_above_surface) {
         above_surface_indices->indices.push_back(i);
       }
     }
@@ -164,8 +168,8 @@ bool FindObjectsOnSurface(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
     object.cloud = cloud;
     object.indices.reset(new pcl::PointIndices(object_indices[i]));
     object.pose_stamped.header.frame_id = cloud->header.frame_id;
-    FitBox(cloud, indices, surface.coefficients, &object.pose_stamped.pose,
-           &object.dimensions);
+    FitBox(cloud, object.indices, surface.coefficients,
+           &object.pose_stamped.pose, &object.dimensions);
     surface_objects->objects.push_back(object);
   }
 

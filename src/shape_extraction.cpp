@@ -24,13 +24,16 @@ bool FitBox(const PointCloudC::Ptr& input,
 
   // Compute z height as maximum distance from planes
   double height = 0.0;
-  for (size_t i = 0; i < input->size(); ++i) {
-    const PointC& pt = input->at(i);
+  for (size_t i = 0; i < indices->indices.size(); ++i) {
+    int index = indices->indices[i];
+    const PointC& pt = input->at(index);
     const Eigen::Vector4f pp(pt.x, pt.y, pt.z, 1);
     Eigen::Vector4f m(model->values[0], model->values[1], model->values[2],
                       model->values[3]);
     double distance_to_plane = fabs(pp.dot(m));
-    if (distance_to_plane > height) height = distance_to_plane;
+    if (distance_to_plane > height) {
+      height = distance_to_plane;
+    }
   }
 
   // Project object into 2d, using plane model coefficients
