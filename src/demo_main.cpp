@@ -9,10 +9,23 @@
 #include "surface_perception/segmentation.h"
 #include "surface_perception/surface_objects.h"
 #include "surface_perception/typedefs.h"
+#include "surface_perception/visualization.h"
 
 using surface_perception::SurfaceObjects;
+using surface_perception::SurfaceViz;
 
-void Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
+class Demo {
+ public:
+  Demo(const SurfaceViz& viz);
+  void Callback(const sensor_msgs::PointCloud2ConstPtr& cloud);
+
+ private:
+  SurfaceViz viz_;
+};
+
+Demo::Demo(const SurfaceViz& viz) : viz_(viz) {}
+
+void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   PointCloudC::Ptr pcl_cloud(new PointCloudC);
   pcl::fromROSMsg(*cloud, *pcl_cloud);
 
@@ -59,12 +72,20 @@ void Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   } else {
     ROS_INFO("Found %ld objects", surface_objects[0].objects.size());
   }
+
+  viz_.Hide();
+  viz_.set_surface_objects(surface_objects);
+  viz_.Show();
 }
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "surface_perception_demo");
   ros::NodeHandle nh;
-  ros::Subscriber pc_sub =
-      nh.subscribe<sensor_msgs::PointCloud2>("cloud_in", 1, Callback);
+  ros::Publisher marker_pub =
+      nh.advertise<visualization_msgs::Marker>("surface_objects", 20);
+  SurfaceViz viz(marker_pub);
+  Demo demo(viz);
+  ros::Subscriber pc_sub = nh.subscribe<sensor_msgs::PointCloud2>(
+      "cloud_in", 1, &Demo::Callback, &demo);
   ros::spin();
 }
