@@ -14,12 +14,13 @@
 #include "surface_perception/typedefs.h"
 
 namespace surface_perception {
-bool FitBox(const PointCloudC::Ptr& input,
+void FitBox(const PointCloudC::Ptr& input,
             const pcl::PointIndices::Ptr& indices,
             const pcl::ModelCoefficients::Ptr& model, geometry_msgs::Pose* pose,
             geometry_msgs::Vector3* dimensions) {
-  double min_volume = std::numeric_limits<
-      double>::max();              // the minimum volume shape found thus far.
+  double min_volume = std::numeric_limits<double>::max();  // the minimum volume
+                                                           // shape found thus
+                                                           // far.
   Eigen::Matrix3f transformation;  // the transformation for the best-fit shape
 
   // Compute z height as maximum distance from planes
@@ -141,6 +142,5 @@ bool FitBox(const PointCloudC::Ptr& input,
       min_volume = area * height;
     }
   }
-  return true;
 }
 }  // namespace surface_perception

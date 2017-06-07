@@ -7,6 +7,7 @@
 #include "surface_perception/surface.h"
 
 namespace surface_perception {
+/// \brief Represents a surface with objects above it.
 struct SurfaceObjects {
  public:
   Surface surface;
