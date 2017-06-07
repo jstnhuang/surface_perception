@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   sensor_msgs
+  visualization_msgs
 )
 
 find_package(Eigen REQUIRED)
@@ -45,6 +46,7 @@ catkin_package(
     roscpp
     rospy
     sensor_msgs
+    visualization_msgs
   DEPENDS
     Eigen
     PCL
