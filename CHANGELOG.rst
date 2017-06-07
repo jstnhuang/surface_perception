@@ -2,8 +2,8 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.1 (2017-06-07)
+------------------
 * Added missing dependency.
 * Contributors: Justin Huang
 
