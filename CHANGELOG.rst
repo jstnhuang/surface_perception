@@ -2,6 +2,11 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Make new x-axis the one closer to the data's x-axis.
+* Contributors: Justin Huang
+
 0.2.0 (2017-08-28)
 ------------------
 * Changed oriented bounding box fitting algorithm so that the x direction always points towards the shorter side.
