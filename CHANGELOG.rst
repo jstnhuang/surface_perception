@@ -2,8 +2,8 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.1 (2017-08-28)
+------------------
 * Make new x-axis the one closer to the data's x-axis.
 * Contributors: Justin Huang
 
