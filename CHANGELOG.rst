@@ -2,6 +2,11 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Changed oriented bounding box fitting algorithm so that the x direction always points towards the shorter side.
+* Contributors: Justin Huang
+
 0.1.3 (2017-07-24)
 ------------------
 * Added mainpage documentation.
