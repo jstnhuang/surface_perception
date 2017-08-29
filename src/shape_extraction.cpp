@@ -134,6 +134,11 @@ void FitBox(const PointCloudC::Ptr& input,
       double y_dim = y_max - y_min;
       if (x_dim > y_dim) {
         Eigen::Vector3f y_axis = transformation.col(1);
+        // There are two choices for the new x axis. This chooses the one that
+        // is closer to the positive x direction of the data.
+        if (y_axis.x() < 0) {
+          y_axis = -1 * transformation.col(1);
+        }
         transformation.col(0) = y_axis;
         transformation.col(1) =
             transformation.col(2).cross(transformation.col(0));
