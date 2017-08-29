@@ -22,7 +22,8 @@ namespace surface_perception {
 ///   coefficients.
 /// \param[out] pose The pose representing the center of the box. The z
 ///   direction points "up" relative to the surface. The x and y directions are
-///   aligned with the fitted box.
+///   aligned with the fitted box, with the x direction pointing toward the
+///   shorter side of the box.
 /// \param[out] dimensions The dimensions of the oriented bounding box. x, y,
 ///   and z correspond to the directions of the pose.
 void FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,

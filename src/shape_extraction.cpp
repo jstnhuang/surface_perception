@@ -122,16 +122,31 @@ void FitBox(const PointCloudC::Ptr& input,
     if (area * height < min_volume) {
       transformation = inv_plane_rotation * inv_rotation;
 
-      dimensions->x = (x_max - x_min);
-      dimensions->y = (y_max - y_min);
-      dimensions->z = height;
-
       Eigen::Vector3f pose3f((x_max + x_min) / 2.0, (y_max + y_min) / 2.0,
                              projected_cloud[0].z + height / 2.0);
       pose3f = transformation * pose3f;
       pose->position.x = pose3f(0);
       pose->position.y = pose3f(1);
       pose->position.z = pose3f(2);
+
+      // Flip orientation if necessary to force x dimension < y dimension
+      double x_dim = x_max - x_min;
+      double y_dim = y_max - y_min;
+      if (x_dim > y_dim) {
+        Eigen::Vector3f y_axis = transformation.col(1);
+        transformation.col(0) = y_axis;
+        transformation.col(1) =
+            transformation.col(2).cross(transformation.col(0));
+      }
+
+      if (x_dim > y_dim) {
+        dimensions->x = (y_max - y_min);
+        dimensions->y = (x_max - x_min);
+      } else {
+        dimensions->x = (x_max - x_min);
+        dimensions->y = (y_max - y_min);
+      }
+      dimensions->z = height;
 
       Eigen::Quaternionf q(transformation);
       pose->orientation.x = q.x();

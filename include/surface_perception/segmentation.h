@@ -16,7 +16,9 @@ namespace surface_perception {
 /// This algorithm takes in a tabletop scene and segments it into a tabletop
 /// surface with some number of objects above it. The objects are segmented
 /// using a Euclidean clustering algorithm. The algorithm fits oriented bounding
-/// boxes around the surface and the objects.
+/// boxes around the surface and the objects. For each object, the z direction
+/// points "up," and the x direction points toward the shorter side of the
+/// oriented bounding box.
 ///
 /// The algorithm assumes that the input scene is provided such that the
 /// positive z direction points "up."

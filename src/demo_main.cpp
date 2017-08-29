@@ -39,7 +39,7 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   min << 0, -1, 0.3, 1;
   crop.setMin(min);
   Eigen::Vector4f max;
-  max << 1, 1, 2, 1;
+  max << 1.05, 1, 2, 1;
   crop.setMax(max);
   crop.filter(point_indices->indices);
 
