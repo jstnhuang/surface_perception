@@ -15,6 +15,8 @@
 #include "surface_perception/surface_objects.h"
 #include "surface_perception/typedefs.h"
 
+#include "surface_ransac/surface_finder.h"
+
 namespace surface_perception {
 Segmentation::Segmentation()
     : cloud_(),
