@@ -1,5 +1,8 @@
 #include "surface_perception/segmentation.h"
 
+#include <vector>
+#include <limits>
+
 #include "Eigen/Eigen"
 #include "pcl/common/angles.h"
 #include "pcl/filters/extract_indices.h"
@@ -100,6 +103,43 @@ bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   FitBox(cloud, indices_internal, surface->coefficients,
          &surface->pose_stamped.pose, &surface->dimensions);
   return true;
+}
+
+bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+                  pcl::PointIndicesPtr indices,
+                  double horizontal_tolerance_degrees, std::vector<Surface>* surfaces) {
+
+  surface_ransac::SurfaceFinder surfaceFinder;
+  std::vector<pcl::PointIndices::Ptr> indices_vec;
+  std::vector<pcl::ModelCoefficients> coeffs_vec;
+  surfaceFinder.setCloud(cloud);
+  surfaceFinder.setMaxIteration(1000);
+  surfaceFinder.setSurfacePointThreshold(1000);
+  surfaceFinder.setToleranceAngle(0.0);
+  surfaceFinder.setMaxPointDistance(0.01);
+  surfaceFinder.exploreSurfaces(0, 10, &indices_vec, &coeffs_vec);
+
+  
+}
+
+void FindHeightInterval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+                  pcl::PointIndicesPtr indices,
+                  double* low, double* hi) {
+  double tmp_low = std::numeric_limits<double>::max();
+  double tmp_hi = std::numeric_limits<double>::min();
+
+  for (size_t i = 0; i < indices->indices.size(); i++) {
+    const pcl::PointXYZRGB& pt = cloud->points[indices->indices[i]];
+    if (pt.z < tmp_low) {
+      tmp_low = pt.z;
+    }
+    if (pt.z > tmp_hi) {
+      tmp_hi = pt.z;
+    }
+  }
+
+  *low = tmp_low;
+  *hi = tmp_hi;
 }
 
 bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,

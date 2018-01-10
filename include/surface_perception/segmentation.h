@@ -138,6 +138,14 @@ bool FindSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                  pcl::PointIndicesPtr indices,
                  double horizontal_tolerance_degrees, Surface* surface);
 
+bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+                  pcl::PointIndicesPtr indices,
+                  double horizontal_tolerance_degrees, std::vector<Surface>* surfaces);
+
+void FindHeightInterval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+                  pcl::PointIndicesPtr indices,
+                  double* low, double* hi);
+
 /// \brief Extracts the part of the point cloud above a given surface.
 ///
 /// \param[in] cloud The point cloud to find a surface in, where positive z
