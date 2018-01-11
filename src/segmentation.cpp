@@ -109,17 +109,41 @@ bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                   pcl::PointIndicesPtr indices,
                   double horizontal_tolerance_degrees, std::vector<Surface>* surfaces) {
 
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cropped_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+  pcl::ExtractIndices<pcl::PointXYZRGB> extract_indices;
+  extract_indices.setInputCloud(cloud);
+  extract_indices.setIndices(indices);
+  extract_indices.filter(*cropped_cloud);
+
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr no_nan_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+  std::vector<int> transform_index;
+  pcl::removeNaNFromPointCloud(*cropped_cloud, *no_nan_cloud, transform_index);
+
   surface_ransac::SurfaceFinder surfaceFinder;
   std::vector<pcl::PointIndices::Ptr> indices_vec;
   std::vector<pcl::ModelCoefficients> coeffs_vec;
-  surfaceFinder.setCloud(cloud);
+  surfaceFinder.setCloud(no_nan_cloud);
   surfaceFinder.setMaxIteration(1000);
   surfaceFinder.setSurfacePointThreshold(1000);
   surfaceFinder.setToleranceAngle(0.0);
   surfaceFinder.setMaxPointDistance(0.01);
   surfaceFinder.exploreSurfaces(0, 10, &indices_vec, &coeffs_vec);
 
-  
+  if (indices_vec.size() == 0 || coeffs_vec.size() == 0) {
+    ROS_INFO("Warning: no surface found.");
+    return false;
+  }
+
+  for (size_t i = 0; i < indices_vec.size() && i < coeffs_vec.size(); i++) {
+    Surface surface;
+    surface.coefficients.reset(new pcl::ModelCoefficients);
+    surface.coefficients->values = coeffs_vec[i].values;
+    surface.pose_stamped.header.frame_id = no_nan_cloud->header.frame_id;
+    FitBox(no_nan_cloud, indices_vec[i], surface.coefficients, &surface.pose_stamped.pose, &surface.dimensions);
+    surfaces->push_back(surface);
+  }
+
+  return true;
 }
 
 void FindHeightInterval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
