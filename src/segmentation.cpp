@@ -115,14 +115,10 @@ bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
   extract_indices.setIndices(indices);
   extract_indices.filter(*cropped_cloud);
 
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr no_nan_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-  std::vector<int> transform_index;
-  pcl::removeNaNFromPointCloud(*cropped_cloud, *no_nan_cloud, transform_index);
-
   surface_ransac::SurfaceFinder surfaceFinder;
   std::vector<pcl::PointIndices::Ptr> indices_vec;
   std::vector<pcl::ModelCoefficients> coeffs_vec;
-  surfaceFinder.setCloud(no_nan_cloud);
+  surfaceFinder.setCloud(cropped_cloud);
   surfaceFinder.setMaxIteration(1000);
   surfaceFinder.setSurfacePointThreshold(1000);
   surfaceFinder.setToleranceAngle(0.0);
@@ -138,8 +134,8 @@ bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
     Surface surface;
     surface.coefficients.reset(new pcl::ModelCoefficients);
     surface.coefficients->values = coeffs_vec[i].values;
-    surface.pose_stamped.header.frame_id = no_nan_cloud->header.frame_id;
-    FitBox(no_nan_cloud, indices_vec[i], surface.coefficients, &surface.pose_stamped.pose, &surface.dimensions);
+    surface.pose_stamped.header.frame_id = cropped_cloud->header.frame_id;
+    FitBox(cropped_cloud, indices_vec[i], surface.coefficients, &surface.pose_stamped.pose, &surface.dimensions);
     surfaces->push_back(surface);
   }
 
