@@ -140,7 +140,7 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
       size_t index = indices->indices[i];
       const PointC& pt = cloud->points[index];
       float val = a * pt.x + b * pt.y + c * pt.z + d;
-      if (val >= margin_above_surface && val < height_limit) {
+      if (val >= margin_above_surface) {
         above_surface_indices->indices.push_back(index);
       }
     }
