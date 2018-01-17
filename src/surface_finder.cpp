@@ -115,7 +115,7 @@ void sampleThreeNums(size_t rand_range, size_t nums_size, size_t rand_nums[]) {
 }
 }  // Anonymous namespace
 
-namespace surface_ransac {
+namespace surface_perception {
 void SurfaceFinder::setCloud(const PointCloudC::Ptr& cloud) {
   cloud_ = cloud;
 

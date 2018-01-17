@@ -12,7 +12,7 @@
 typedef pcl::PointXYZRGB PointC;
 typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudC;
 
-namespace surface_ransac {
+namespace surface_perception {
 void SurfaceHistoryRecorder::record(const size_t& id,
                                     const PointCloudC::Ptr& full_cloud,
                                     const pcl::PointIndices::Ptr& indices,
@@ -66,4 +66,4 @@ void SurfaceHistoryRecorder::getIteration(const size_t& id, size_t* iter_ptr) co
     *iter_ptr = iter->second;
   }
 }
-}  // namespace surface_ransac
+}  // namespace surface_perception

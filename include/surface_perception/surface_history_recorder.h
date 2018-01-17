@@ -1,5 +1,5 @@
-#ifndef _SURFACE_RANSAC_SURFACE_HISTORY_RECORDER_H_
-#define _SURFACE_RANSAC_SURFACE_HISTORY_RECORDER_H_
+#ifndef _SURFACE_PERCEPTION_SURFACE_HISTORY_RECORDER_H_
+#define _SURFACE_PERCEPTION_SURFACE_HISTORY_RECORDER_H_
 
 #include <ctime>
 #include <map>
@@ -8,7 +8,7 @@
 #include "pcl/point_types.h"
 #include "pcl/PointIndices.h"
 
-namespace surface_ransac {
+namespace surface_perception {
 class SurfaceHistoryRecorder {
  public:
   void record(const size_t& id,
@@ -30,6 +30,6 @@ class SurfaceHistoryRecorder {
   std::map<size_t, time_t> time_history_;
   std::map<size_t, size_t> iter_history_;
 };
-}  // namespace surface_ransac
+}  // namespace surface_perception
 
-#endif  // _SURFACE_RANSAC_SURFACE_HISTORY_RECORDER_H_
+#endif  // _SURFACE_PERCEPTION_SURFACE_HISTORY_RECORDER_H_

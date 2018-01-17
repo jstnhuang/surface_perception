@@ -1,5 +1,5 @@
-#ifndef _SURFACE_RANSAC_SURFACE_FINDER_H_
-#define _SURFACE_RANSAC_SURFACE_FINDER_H_
+#ifndef _SURFACE_PERCEPTION_SURFACE_FINDER_H_
+#define _SURFACE_PERCEPTION_SURFACE_FINDER_H_
 
 #include <vector>
 #include <map>
@@ -9,7 +9,7 @@
 #include "pcl/PointIndices.h"
 #include "pcl/ModelCoefficients.h"
 
-namespace surface_ransac {
+namespace surface_perception {
 class SurfaceFinder {
  public:
   void setCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud);
@@ -30,7 +30,7 @@ class SurfaceFinder {
   size_t min_point_;
   std::map<double, std::vector<int> > sortedIndices_;
 };
-}  // namespace surface_ransac
+}  // namespace surface_perception
 
 
-#endif  // _SURFACE_RANSAC_SURFACE_FINDER_H_
+#endif  // _SURFACE_PERCEPTION_SURFACE_FINDER_H_

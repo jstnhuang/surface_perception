@@ -92,7 +92,7 @@ bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   extract_indices.setIndices(indices);
   extract_indices.filter(*cropped_cloud);
 
-  surface_ransac::SurfaceFinder surfaceFinder;
+  SurfaceFinder surfaceFinder;
   std::vector<pcl::PointIndices::Ptr> indices_vec;
   std::vector<pcl::ModelCoefficients> coeffs_vec;
   surfaceFinder.setCloud(cropped_cloud);
