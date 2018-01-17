@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   visualization_msgs
-  surface_ransac
 )
 
 find_package(Eigen REQUIRED)
@@ -48,7 +47,6 @@ catkin_package(
     rospy
     sensor_msgs
     visualization_msgs
-    surface_ransac
   DEPENDS
     Eigen
     PCL
