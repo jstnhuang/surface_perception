@@ -68,6 +68,7 @@ add_library(surface_perception_segmentation src/segmentation.cpp)
 add_dependencies(surface_perception_segmentation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(surface_perception_segmentation
   surface_perception_shape_extraction
+  surface_perception_surface_finder
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES})
 
