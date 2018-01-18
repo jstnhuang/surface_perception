@@ -21,8 +21,8 @@
 
 namespace {
 bool SurfaceComparator(const surface_perception::Surface& s1, const surface_perception::Surface& s2) {
-  double s1_intercept = s1.coefficients->values[3] / s1.coefficients->values[2];
-  double s2_intercept = s1.coefficients->values[3] / s2.coefficients->values[2];
+  double s1_intercept = -1.0 * s1.coefficients->values[3] / s1.coefficients->values[2];
+  double s2_intercept = -1.0 * s2.coefficients->values[3] / s2.coefficients->values[2];
 
   return s1_intercept < s2_intercept;
 }
@@ -97,8 +97,8 @@ bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   std::vector<pcl::ModelCoefficients> coeffs_vec;
   surfaceFinder.setCloud(cropped_cloud);
   surfaceFinder.setMaxIteration(1000);
-  surfaceFinder.setSurfacePointThreshold(1000);
-  surfaceFinder.setToleranceAngle(0.0);
+  surfaceFinder.setSurfacePointThreshold(10000);
+  surfaceFinder.setToleranceAngle(5.0);
   surfaceFinder.setMaxPointDistance(0.01);
   surfaceFinder.exploreSurfaces(0, 10, &indices_vec, &coeffs_vec);
 
@@ -140,7 +140,7 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
       size_t index = indices->indices[i];
       const PointC& pt = cloud->points[index];
       float val = a * pt.x + b * pt.y + c * pt.z + d;
-      if (val >= margin_above_surface) {
+      if (val >= margin_above_surface && height_limit - pt.z > margin_above_surface) {
         above_surface_indices->indices.push_back(index);
       }
     }
@@ -148,7 +148,7 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
     for (size_t i = 0; i < cloud->size(); ++i) {
       const PointC& pt = cloud->points[i];
       float val = a * pt.x + b * pt.y + c * pt.z + d;
-      if (val >= margin_above_surface && val < height_limit) {
+      if (val >= margin_above_surface && height_limit - pt.z > margin_above_surface) {
         above_surface_indices->indices.push_back(i);
       }
     }
@@ -172,10 +172,10 @@ bool FindObjectsOnSurface(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
 
   // Obtain indices between each horizontal surfaces
   for (size_t i = 0; i < surfaces.size(); i++) {
-    float height_limit = std::numeric_limits<double>::max();
+    float height_limit = std::numeric_limits<float>::max();
     pcl::PointIndices::Ptr above_surface_indices(new pcl::PointIndices);
     if (i != (surfaces.size() - 1)) {
-      height_limit = surfaces[i + 1].coefficients->values[3] / surfaces[i + 1].coefficients->values[2];  
+      height_limit = -1.0 * surfaces[i + 1].coefficients->values[3] / surfaces[i + 1].coefficients->values[2]; 
     }
 
     bool success = GetSceneAboveSurface(cloud, indices, *surfaces[i].coefficients, margin_above_surface, height_limit, above_surface_indices);
