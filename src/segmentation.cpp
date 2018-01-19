@@ -97,7 +97,7 @@ bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   std::vector<pcl::ModelCoefficients> coeffs_vec;
   surfaceFinder.setCloud(cropped_cloud);
   surfaceFinder.setMaxIteration(1000);
-  surfaceFinder.setSurfacePointThreshold(10000);
+  surfaceFinder.setSurfacePointThreshold(3000);
   surfaceFinder.setToleranceAngle(5.0);
   surfaceFinder.setMaxPointDistance(0.01);
   surfaceFinder.exploreSurfaces(0, 10, &indices_vec, &coeffs_vec);
