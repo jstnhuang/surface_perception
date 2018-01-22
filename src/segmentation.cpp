@@ -4,7 +4,6 @@
 
 #include "Eigen/Eigen"
 #include "pcl/common/angles.h"
-#include "pcl/filters/extract_indices.h"
 #include "pcl/sample_consensus/method_types.h"
 #include "pcl/sample_consensus/model_types.h"
 #include "pcl/segmentation/extract_clusters.h"
@@ -86,16 +85,11 @@ bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
 
 bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
                  double horizontal_tolerance_degrees, std::vector<Surface>* surfaces) {
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cropped_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-  pcl::ExtractIndices<pcl::PointXYZRGB> extract_indices;
-  extract_indices.setInputCloud(cloud);
-  extract_indices.setIndices(indices);
-  extract_indices.filter(*cropped_cloud);
-
   SurfaceFinder surfaceFinder;
   std::vector<pcl::PointIndices::Ptr> indices_vec;
   std::vector<pcl::ModelCoefficients> coeffs_vec;
-  surfaceFinder.setCloud(cropped_cloud);
+  surfaceFinder.setCloud(cloud);
+  surfaceFinder.setCloudIndices(indices);
   surfaceFinder.setMaxIteration(1000);
   surfaceFinder.setSurfacePointThreshold(3000);
   surfaceFinder.setToleranceAngle(5.0);
@@ -111,8 +105,8 @@ bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
     Surface surface;
     surface.coefficients.reset(new pcl::ModelCoefficients);
     surface.coefficients->values = coeffs_vec[i].values;
-    surface.pose_stamped.header.frame_id = cropped_cloud->header.frame_id;
-    FitBox(cropped_cloud, indices_vec[i], surface.coefficients, &surface.pose_stamped.pose, &surface.dimensions);
+    surface.pose_stamped.header.frame_id = cloud->header.frame_id;
+    FitBox(cloud, indices_vec[i], surface.coefficients, &surface.pose_stamped.pose, &surface.dimensions);
     surfaces->push_back(surface);
   }
 
