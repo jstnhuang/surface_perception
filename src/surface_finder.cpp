@@ -50,8 +50,7 @@ void planeEquation(const std::vector<PointC>& pts, double* a, double* b, double*
  * This function gives a vector of points within certain distance to a plane specified by
  * the z_val
  */
-void filterIndices(const PointCloudC& cloud,
-                   const double& dist_limit,
+void filterIndices(const double& dist_limit,
                    const std::map<double, std::vector<int> >& sortedIndices,
                    const double& z_val,
                    std::vector<int>* output_pts) {
@@ -116,21 +115,33 @@ void sampleThreeNums(size_t rand_range, size_t nums_size, size_t rand_nums[]) {
 }  // Anonymous namespace
 
 namespace surface_perception {
+SurfaceFinder::SurfaceFinder()
+    : cloud_(new PointCloudC),
+      cloud_indices_(new pcl::PointIndices),
+      rad_(0.0),
+      dist_(0.01),
+      max_iter_(100),
+      sortedIndices_() {}
+
 void SurfaceFinder::setCloud(const PointCloudC::Ptr& cloud) {
   cloud_ = cloud;
 
-  // Record the indices and sort by height
-  for (size_t i = 0; i < cloud_->points.size(); i++) {
-    const PointC& pt = cloud_->points[i];
-    std::map<double, std::vector<int> >::iterator iter = sortedIndices_.find(pt.z);
-    if (iter != sortedIndices_.end()) {
-      sortedIndices_[pt.z].push_back(i);
-    } else {
-      std::vector<int> indices;
-      indices.push_back(i);
-      sortedIndices_[pt.z] = indices;
+  // Fill up indices, if the indices is not specified yet
+  if (cloud_indices_->header.frame_id == "" && cloud_indices_->indices.size() == 0) {
+    for (size_t i = 0; i < cloud_->points.size(); i++) {
+      cloud_indices_->indices.push_back(i);
     }
+    cloud_indices_->header.frame_id = cloud_->header.frame_id;
   }
+
+  sortIndices();
+}
+
+void SurfaceFinder::setCloudIndices(const pcl::PointIndices::Ptr indices) {
+  cloud_indices_->header.frame_id = indices->header.frame_id;
+  cloud_indices_->indices = indices->indices;
+
+  sortIndices();
 }
 
 void SurfaceFinder::setToleranceAngle(const double& degrees) {
@@ -160,6 +171,10 @@ void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
   // 2. Calculate the horizontal plane
   // 3. Store the plane and rank it by number of points the plane covers
 
+  ROS_INFO("Start exploring surfaces in %ld indices of %s",
+           cloud_indices_->indices.size(),
+           cloud_indices_->header.frame_id.c_str());
+
   size_t num_surface = 0; 
   size_t max_inlier_count = std::numeric_limits<size_t>::min();
   std::srand(unsigned(std::time(0)));
@@ -180,12 +195,12 @@ void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
     pcl::PointIndices::Ptr indices(new pcl::PointIndices);
 
     // Sample 1 point randomly to establish a plane, by assuming it's horizontal
-    size_t rand_index = std::rand() % cloud_->points.size();
-    const PointC& pt = cloud_->points[rand_index];
+    size_t rand_index = std::rand() % cloud_indices_->indices.size();
+    const PointC& pt = cloud_->points[cloud_indices_->indices[rand_index]];
 
     // Count points within given distance to the plane
     std::vector<int> inlier_indices;
-    filterIndices(*cloud_, dist_, sortedIndices_, pt.z, &inlier_indices);
+    filterIndices(dist_, sortedIndices_, pt.z, &inlier_indices);
 
     // Establish coefficients
     coeff->values[0] = 0;
@@ -267,6 +282,23 @@ void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
     }
   } else {
     ROS_INFO("Warning: no surface found.");
+  }
+}
+
+void SurfaceFinder::sortIndices() {
+  sortedIndices_.clear();
+
+  // Record the indices and sort by height
+  for (size_t i = 0; i < cloud_indices_->indices.size(); i++) {
+    const PointC& pt = cloud_->points[cloud_indices_->indices[i]];
+    std::map<double, std::vector<int> >::iterator iter = sortedIndices_.find(pt.z);
+    if (iter != sortedIndices_.end()) {
+      sortedIndices_[pt.z].push_back(cloud_indices_->indices[i]);
+    } else {
+      std::vector<int> indices_vec;
+      indices_vec.push_back(cloud_indices_->indices[i]);
+      sortedIndices_[pt.z] = indices_vec;
+    }
   }
 }
 }

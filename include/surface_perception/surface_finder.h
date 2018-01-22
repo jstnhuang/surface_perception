@@ -12,7 +12,9 @@
 namespace surface_perception {
 class SurfaceFinder {
  public:
+  SurfaceFinder();
   void setCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud);
+  void setCloudIndices(const pcl::PointIndices::Ptr indices);
   void setToleranceAngle(const double& degrees);
   void setMaxPointDistance(const double& dist);
   void setMaxIteration(const size_t& max_iter);
@@ -24,11 +26,13 @@ class SurfaceFinder {
                        std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* history = new std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>());
  private:
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
+  pcl::PointIndices::Ptr cloud_indices_;
   double rad_;
   double dist_;
   size_t max_iter_;
   size_t min_point_;
   std::map<double, std::vector<int> > sortedIndices_;
+  void sortIndices();
 };
 }  // namespace surface_perception
 
