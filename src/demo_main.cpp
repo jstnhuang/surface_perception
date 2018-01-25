@@ -16,14 +16,17 @@ using surface_perception::SurfaceViz;
 
 class Demo {
  public:
-  Demo(const SurfaceViz& viz);
+  Demo(const SurfaceViz& viz, const ros::Publisher input_pub);
   void Callback(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
  private:
   SurfaceViz viz_;
+  ros::Publisher input_pub_;
 };
 
-Demo::Demo(const SurfaceViz& viz) : viz_(viz) {}
+Demo::Demo(const SurfaceViz& viz, const ros::Publisher input_pub)
+    : viz_(viz),
+      input_pub_(input_pub) {}
 
 void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   PointCloudC::Ptr pcl_cloud(new PointCloudC);
@@ -33,27 +36,34 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   pcl::removeNaNFromPointCloud(*pcl_cloud, *pcl_cloud, indices);
 
   pcl::PointIndices::Ptr point_indices(new pcl::PointIndices);
+  PointCloudC::Ptr cropped_cloud(new PointCloudC);
+  sensor_msgs::PointCloud2 msg_out;
+
   pcl::CropBox<PointC> crop;
   crop.setInputCloud(pcl_cloud);
   Eigen::Vector4f min;
-  min << 0, -1, 0.3, 1;
+  min << 0, -0.5, 0.05, 1;
   crop.setMin(min);
   Eigen::Vector4f max;
-  max << 1.05, 1, 2, 1;
+  max << 1.3, 0.5, 2, 1;
   crop.setMax(max);
   crop.filter(point_indices->indices);
+  crop.filter(*cropped_cloud);
+
+  pcl::toROSMsg(*cropped_cloud, msg_out);
+  input_pub_.publish(msg_out);
 
   double horizontal_tolerance_degrees;
   ros::param::param("horizontal_tolerance_degrees",
                     horizontal_tolerance_degrees, 10.0);
   double margin_above_surface;
-  ros::param::param("margin_above_surface", margin_above_surface, 0.005);
+  ros::param::param("margin_above_surface", margin_above_surface, 0.01);
   double cluster_distance;
-  ros::param::param("cluster_distance", cluster_distance, 0.01);
+  ros::param::param("cluster_distance", cluster_distance, 0.015);
   int min_cluster_size;
-  ros::param::param("min_cluster_size", min_cluster_size, 10);
+  ros::param::param("min_cluster_size", min_cluster_size, 300);
   int max_cluster_size;
-  ros::param::param("max_cluster_size", max_cluster_size, 10000);
+  ros::param::param("max_cluster_size", max_cluster_size, 5000);
 
   surface_perception::Segmentation seg;
   seg.set_input_cloud(pcl_cloud);
@@ -81,10 +91,14 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 int main(int argc, char** argv) {
   ros::init(argc, argv, "surface_perception_demo");
   ros::NodeHandle nh;
+
   ros::Publisher marker_pub =
       nh.advertise<visualization_msgs::Marker>("surface_objects", 20);
+  ros::Publisher cropped_input_pub =
+      nh.advertise<sensor_msgs::PointCloud2>("demo_cropped_input_cloud", 1, true);
+
   SurfaceViz viz(marker_pub);
-  Demo demo(viz);
+  Demo demo(viz, cropped_input_pub);
   ros::Subscriber pc_sub = nh.subscribe<sensor_msgs::PointCloud2>(
       "cloud_in", 1, &Demo::Callback, &demo);
   ros::spin();
