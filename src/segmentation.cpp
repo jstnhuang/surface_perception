@@ -19,9 +19,12 @@
 #include "surface_perception/surface_finder.h"
 
 namespace {
-bool SurfaceComparator(const surface_perception::Surface& s1, const surface_perception::Surface& s2) {
-  double s1_intercept = -1.0 * s1.coefficients->values[3] / s1.coefficients->values[2];
-  double s2_intercept = -1.0 * s2.coefficients->values[3] / s2.coefficients->values[2];
+bool SurfaceComparator(const surface_perception::Surface& s1,
+                       const surface_perception::Surface& s2) {
+  double s1_intercept =
+      -1.0 * s1.coefficients->values[3] / s1.coefficients->values[2];
+  double s2_intercept =
+      -1.0 * s2.coefficients->values[3] / s2.coefficients->values[2];
 
   return s1_intercept < s2_intercept;
 }
@@ -65,8 +68,8 @@ void Segmentation::set_max_cluster_size(int max_cluster_size) {
 
 bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
   std::vector<Surface> surface_vec;
-  bool success =
-      FindSurface(cloud_, indices_, horizontal_tolerance_degrees_, &surface_vec);
+  bool success = FindSurface(cloud_, indices_, horizontal_tolerance_degrees_,
+                             &surface_vec);
   if (!success) {
     ROS_ERROR("Failed to find any surface.");
     return false;
@@ -84,7 +87,8 @@ bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
 }
 
 bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
-                 double horizontal_tolerance_degrees, std::vector<Surface>* surfaces) {
+                 double horizontal_tolerance_degrees,
+                 std::vector<Surface>* surfaces) {
   SurfaceFinder surfaceFinder;
   std::vector<pcl::PointIndices::Ptr> indices_vec;
   std::vector<pcl::ModelCoefficients> coeffs_vec;
@@ -106,7 +110,8 @@ bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
     surface.coefficients.reset(new pcl::ModelCoefficients);
     surface.coefficients->values = coeffs_vec[i].values;
     surface.pose_stamped.header.frame_id = cloud->header.frame_id;
-    FitBox(cloud, indices_vec[i], surface.coefficients, &surface.pose_stamped.pose, &surface.dimensions);
+    FitBox(cloud, indices_vec[i], surface.coefficients,
+           &surface.pose_stamped.pose, &surface.dimensions);
     surfaces->push_back(surface);
   }
 
@@ -134,7 +139,8 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
       size_t index = indices->indices[i];
       const PointC& pt = cloud->points[index];
       float val = a * pt.x + b * pt.y + c * pt.z + d;
-      if (val >= margin_above_surface && height_limit - pt.z > margin_above_surface) {
+      if (val >= margin_above_surface &&
+          height_limit - pt.z > margin_above_surface) {
         above_surface_indices->indices.push_back(index);
       }
     }
@@ -142,7 +148,8 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
     for (size_t i = 0; i < cloud->size(); ++i) {
       const PointC& pt = cloud->points[i];
       float val = a * pt.x + b * pt.y + c * pt.z + d;
-      if (val >= margin_above_surface && height_limit - pt.z > margin_above_surface) {
+      if (val >= margin_above_surface &&
+          height_limit - pt.z > margin_above_surface) {
         above_surface_indices->indices.push_back(i);
       }
     }
@@ -155,9 +162,9 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
 }
 
 bool FindObjectsOnSurface(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
-                          const std::vector<Surface>& surface_vec, double margin_above_surface,
-                          double cluster_distance, int min_cluster_size,
-                          int max_cluster_size,
+                          const std::vector<Surface>& surface_vec,
+                          double margin_above_surface, double cluster_distance,
+                          int min_cluster_size, int max_cluster_size,
                           std::vector<SurfaceObjects>* surfaces_objects_vec) {
   // Copy the vector and sort by height
   std::vector<Surface> surfaces = surface_vec;
@@ -169,19 +176,24 @@ bool FindObjectsOnSurface(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
     float height_limit = std::numeric_limits<float>::max();
     pcl::PointIndices::Ptr above_surface_indices(new pcl::PointIndices);
     if (i != (surfaces.size() - 1)) {
-      height_limit = -1.0 * surfaces[i + 1].coefficients->values[3] / surfaces[i + 1].coefficients->values[2]; 
+      height_limit = -1.0 * surfaces[i + 1].coefficients->values[3] /
+                     surfaces[i + 1].coefficients->values[2];
     }
 
-    bool success = GetSceneAboveSurface(cloud, indices, *surfaces[i].coefficients, margin_above_surface, height_limit, above_surface_indices);
+    bool success = GetSceneAboveSurface(
+        cloud, indices, *surfaces[i].coefficients, margin_above_surface,
+        height_limit, above_surface_indices);
     if (!success) {
-      ROS_ERROR("Error: extraction of indices above a horizontal surface failed");
+      ROS_ERROR(
+          "Error: extraction of indices above a horizontal surface failed");
       return false;
     }
 
     above_surface_indices_vec.push_back(above_surface_indices);
   }
 
-  for (size_t i = 0; i < surfaces.size() && i < above_surface_indices_vec.size(); i++) {
+  for (size_t i = 0;
+       i < surfaces.size() && i < above_surface_indices_vec.size(); i++) {
     std::vector<pcl::PointIndices> object_indices;
     pcl::EuclideanClusterExtraction<PointC> euclid;
     euclid.setInputCloud(cloud);

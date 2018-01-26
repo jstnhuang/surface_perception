@@ -1,25 +1,27 @@
 #ifndef _SURFACE_PERCEPTION_SURFACE_FINDER_H_
 #define _SURFACE_PERCEPTION_SURFACE_FINDER_H_
 
-#include <vector>
 #include <map>
+#include <vector>
 
+#include "pcl/ModelCoefficients.h"
+#include "pcl/PointIndices.h"
 #include "pcl/point_cloud.h"
 #include "pcl/point_types.h"
-#include "pcl/PointIndices.h"
-#include "pcl/ModelCoefficients.h"
 
 namespace surface_perception {
-/// \brief SurfaceFinder attempt to find multiple horizontal surfaces given a shelf scene.
+/// \brief SurfaceFinder attempt to find multiple horizontal surfaces given a
+/// shelf scene.
 ///
-/// This class is designed to find surfaces in a shelf scene such as a bookshelf. 
-/// In particular, this class finds the horizontal surfaces if the following conditions
-/// are met:
+/// This class is designed to find surfaces in a shelf scene such as a
+/// bookshelf. In particular, this class finds the horizontal surfaces if the
+/// following conditions are met:
 /// 1. No NaN points in the input cloud
 /// 2. Each target surface has different height
-/// 
-/// If the input cloud meets the requirement. Mutation functions of this class can be used
-/// to adjust the parameters based on the scenario of the point cloud scene.
+///
+/// If the input cloud meets the requirement. Mutation functions of this class
+/// can be used to adjust the parameters based on the scenario of the point
+/// cloud scene.
 ///
 /// \b Example usage:
 /// \code
@@ -42,21 +44,22 @@ class SurfaceFinder {
 
   /// \brief Set the input point cloud
   ///
-  /// NaN values in the input cloud should be removed before being passed
+  /// \param NaN values in the input cloud should be removed before being passed
   /// to this function.
   void setCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud);
 
-  
   void setCloudIndices(const pcl::PointIndices::Ptr indices);
   void setToleranceAngle(const double& degrees);
   void setMaxPointDistance(const double& dist);
   void setMaxIteration(const size_t& max_iter);
   void setSurfacePointThreshold(const size_t& min_point);
-  void exploreSurfaces(const size_t& min_surface_amount,
-                       const size_t& max_surface_amount,
-                       std::vector<pcl::PointIndices::Ptr>* indices_internals,
-                       std::vector<pcl::ModelCoefficients>* coeffs,
-                       std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* history = new std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>());
+  void exploreSurfaces(
+      const size_t& min_surface_amount, const size_t& max_surface_amount,
+      std::vector<pcl::PointIndices::Ptr>* indices_internals,
+      std::vector<pcl::ModelCoefficients>* coeffs,
+      std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* history =
+          new std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>());
+
  private:
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
   pcl::PointIndices::Ptr cloud_indices_;
@@ -68,6 +71,5 @@ class SurfaceFinder {
   void sortIndices();
 };
 }  // namespace surface_perception
-
 
 #endif  // _SURFACE_PERCEPTION_SURFACE_FINDER_H_

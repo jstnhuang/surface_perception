@@ -1,61 +1,62 @@
 #include "surface_perception/surface_finder.h"
 #include "surface_perception/surface_history_recorder.h"
 
+#include <limits.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <functional>
+#include <map>
 #include <utility>
 #include <vector>
-#include <algorithm>
-#include <ctime>
-#include <cstdlib>
-#include <limits.h>
-#include <map>
-#include <functional>
-#include <cmath>
 
+#include "pcl/ModelCoefficients.h"
+#include "pcl/PointIndices.h"
+#include "pcl/common/angles.h"
+#include "pcl/filters/extract_indices.h"
 #include "pcl/point_cloud.h"
 #include "pcl/point_types.h"
-#include "pcl/PointIndices.h"
-#include "pcl/ModelCoefficients.h"
-#include "pcl/common/angles.h"
 #include "ros/ros.h"
-#include "pcl/filters/extract_indices.h"
 
 typedef pcl::PointXYZRGB PointC;
 typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudC;
 
 namespace {
 /**
- * This is a helper function for calculating angle between given plane and z axis
+ * This is a helper function for calculating angle between given plane and z
+ * axis
  */
-double calculateAngle(const double &a, const double &b, const double &c) {
+double calculateAngle(const double& a, const double& b, const double& c) {
   double denominator = sqrt(pow(a, 2) + pow(b, 2) + pow(c, 2));
   double nominator = fabs(c);
-  double tmpRes = nominator / denominator; 
+  double tmpRes = nominator / denominator;
   return acos(tmpRes);
 }
 
 /**
  * This function finds the coefficients of a plane equation, given three points
  */
-void planeEquation(const std::vector<PointC>& pts, double* a, double* b, double* c, double* d) {
-  *a = (pts[1].y - pts[0].y) * (pts[2].z - pts[0].z)
-       - (pts[2].y - pts[0].y) * (pts[1].z - pts[0].z);
-  *b = (pts[1].z - pts[0].z) * (pts[2].x - pts[0].x)
-       - (pts[2].z - pts[0].z) * (pts[1].x - pts[0].x);
-  *c = (pts[1].x - pts[0].x) * (pts[2].y - pts[0].y)
-       - (pts[2].x - pts[0].x) * (pts[1].y - pts[0].y);
+void planeEquation(const std::vector<PointC>& pts, double* a, double* b,
+                   double* c, double* d) {
+  *a = (pts[1].y - pts[0].y) * (pts[2].z - pts[0].z) -
+       (pts[2].y - pts[0].y) * (pts[1].z - pts[0].z);
+  *b = (pts[1].z - pts[0].z) * (pts[2].x - pts[0].x) -
+       (pts[2].z - pts[0].z) * (pts[1].x - pts[0].x);
+  *c = (pts[1].x - pts[0].x) * (pts[2].y - pts[0].y) -
+       (pts[2].x - pts[0].x) * (pts[1].y - pts[0].y);
   *d = -1 * (*a) * pts[0].x - (*b) * pts[0].y - (*c) * pts[0].z;
 }
 
 /**
- * This function gives a vector of points within certain distance to a plane specified by
- * the z_val
+ * This function gives a vector of points within certain distance to a plane
+ * specified by the z_val
  */
 void filterIndices(const double& dist_limit,
                    const std::map<double, std::vector<int> >& sortedIndices,
-                   const double& z_val,
-                   std::vector<int>* output_pts) {
-
-  std::map<double, std::vector<int> >::const_iterator iter = sortedIndices.find(z_val);
+                   const double& z_val, std::vector<int>* output_pts) {
+  std::map<double, std::vector<int> >::const_iterator iter =
+      sortedIndices.find(z_val);
   if (iter == sortedIndices.end()) {
     ROS_INFO("Error: sampled point with height %f not on the plane", z_val);
     return;
@@ -65,15 +66,15 @@ void filterIndices(const double& dist_limit,
   iter++;
 
   // Find the indices below z_val
-  while (curr_iter != sortedIndices.begin()
-         && (z_val - curr_iter->first) <= dist_limit) {
+  while (curr_iter != sortedIndices.begin() &&
+         (z_val - curr_iter->first) <= dist_limit) {
     for (size_t i = 0; i < curr_iter->second.size(); i++) {
       output_pts->push_back(curr_iter->second[i]);
     }
     curr_iter--;
   }
-  if (curr_iter == sortedIndices.begin()
-      && (z_val - curr_iter->first) <= dist_limit) {
+  if (curr_iter == sortedIndices.begin() &&
+      (z_val - curr_iter->first) <= dist_limit) {
     for (size_t i = 0; i < curr_iter->second.size(); i++) {
       output_pts->push_back(curr_iter->second[i]);
     }
@@ -81,8 +82,8 @@ void filterIndices(const double& dist_limit,
 
   // Find the indices above z_val
   curr_iter = iter;
-  while (curr_iter != sortedIndices.end()
-         && (curr_iter->first - z_val) <= dist_limit) {
+  while (curr_iter != sortedIndices.end() &&
+         (curr_iter->first - z_val) <= dist_limit) {
     for (size_t i = 0; i < curr_iter->second.size(); i++) {
       output_pts->push_back(curr_iter->second[i]);
     }
@@ -93,7 +94,8 @@ void filterIndices(const double& dist_limit,
 /**
  * This function determines if given two planes are similar
  */
-bool isSimilar(const double& dist, const pcl::ModelCoefficients& plane1, const pcl::ModelCoefficients& plane2) {
+bool isSimilar(const double& dist, const pcl::ModelCoefficients& plane1,
+               const pcl::ModelCoefficients& plane2) {
   double z1 = -1.0 * plane1.values[3] / plane1.values[2];
   double z2 = -1.0 * plane2.values[3] / plane2.values[2];
   return fabs(z1 - z2) < 10 * dist;
@@ -127,7 +129,8 @@ void SurfaceFinder::setCloud(const PointCloudC::Ptr& cloud) {
   cloud_ = cloud;
 
   // Fill up indices, if the indices is not specified yet
-  if (cloud_indices_->header.frame_id == "" && cloud_indices_->indices.size() == 0) {
+  if (cloud_indices_->header.frame_id == "" &&
+      cloud_indices_->indices.size() == 0) {
     for (size_t i = 0; i < cloud_->points.size(); i++) {
       cloud_indices_->indices.push_back(i);
     }
@@ -148,9 +151,7 @@ void SurfaceFinder::setToleranceAngle(const double& degrees) {
   rad_ = pcl::deg2rad(degrees);
 }
 
-void SurfaceFinder::setMaxPointDistance(const double& dist) {
-  dist_ = dist;
-}
+void SurfaceFinder::setMaxPointDistance(const double& dist) { dist_ = dist; }
 
 void SurfaceFinder::setMaxIteration(const size_t& max_iter) {
   max_iter_ = max_iter;
@@ -160,14 +161,13 @@ void SurfaceFinder::setSurfacePointThreshold(const size_t& min_point) {
   min_point_ = min_point;
 }
 
-void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
-                                    const size_t& max_surface_amount,
-                                    std::vector<pcl::PointIndices::Ptr>* indices_internals,
-                                    std::vector<pcl::ModelCoefficients>* coeffs,
-                                    std::vector<PointCloudC::Ptr>* history) {
-
+void SurfaceFinder::exploreSurfaces(
+    const size_t& min_surface_amount, const size_t& max_surface_amount,
+    std::vector<pcl::PointIndices::Ptr>* indices_internals,
+    std::vector<pcl::ModelCoefficients>* coeffs,
+    std::vector<PointCloudC::Ptr>* history) {
   // Algorithm overview:
-  // 1. Get a point randomly from cloud_->points, which is a vector<PointCloudC> 
+  // 1. Get a point randomly from cloud_->points, which is a vector<PointCloudC>
   // 2. Calculate the horizontal plane
   // 3. Store the plane and rank it by number of points the plane covers
 
@@ -175,13 +175,14 @@ void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
            cloud_indices_->indices.size(),
            cloud_indices_->header.frame_id.c_str());
 
-  size_t num_surface = 0; 
+  size_t num_surface = 0;
   size_t max_inlier_count = std::numeric_limits<size_t>::min();
   std::srand(unsigned(std::time(0)));
 
   std::map<size_t,
            std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr>,
-           std::greater<size_t> > ranking;
+           std::greater<size_t> >
+      ranking;
 
   SurfaceHistoryRecorder recorder;
 
@@ -215,14 +216,15 @@ void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
       bool qualify = true;
       bool pre_exist = false;
       size_t old_indices_size;
-      for (std::map<size_t,
-                    std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr>,
-                    std::greater<size_t> >::iterator it = ranking.begin();
+      for (std::map<
+               size_t,
+               std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr>,
+               std::greater<size_t> >::iterator it = ranking.begin();
            it != ranking.end(); it++) {
         pcl::ModelCoefficients& old_coeff = *(it->second.first);
-  
+
         old_indices_size = it->first;
-  
+
         // If newly found surface is better, replace
         if (isSimilar(dist_, old_coeff, *coeff)) {
           if (old_indices_size < indices->indices.size()) {
@@ -235,12 +237,15 @@ void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
         }
       }
       if (qualify) {
-        std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr> pr(coeff, indices);
+        std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr> pr(
+            coeff, indices);
         ranking[indices->indices.size()] = pr;
         if (pre_exist) {
-          recorder.update(old_indices_size, indices->indices.size(), cloud_, indices, num_surface);
+          recorder.update(old_indices_size, indices->indices.size(), cloud_,
+                          indices, num_surface);
         } else {
-          recorder.record(indices->indices.size(), cloud_, indices, num_surface);
+          recorder.record(indices->indices.size(), cloud_, indices,
+                          num_surface);
         }
       }
     }
@@ -251,9 +256,10 @@ void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
   //  Report surfaces
   if (ranking.size() > 0) {
     size_t amount = max_surface_amount;
-    for (std::map<size_t,
-                  std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr>,
-                  std::greater<size_t> >::iterator it = ranking.begin();
+    for (std::map<
+             size_t,
+             std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr>,
+             std::greater<size_t> >::iterator it = ranking.begin();
          it != ranking.end(); it++) {
       if (amount == 0) {
         break;
@@ -272,11 +278,11 @@ void SurfaceFinder::exploreSurfaces(const size_t& min_surface_amount,
 
       history->push_back(past_cloud);
 
-      ROS_INFO("%f seconds spent at %ldth iteration for  %ldth surface with size %ld",
-               std::difftime(elapsed_time, start),
-               iter_amount,
-               max_surface_amount - amount + 1,
-               indices->indices.size());
+      ROS_INFO(
+          "%f seconds spent at %ldth iteration for  %ldth surface with size "
+          "%ld",
+          std::difftime(elapsed_time, start), iter_amount,
+          max_surface_amount - amount + 1, indices->indices.size());
 
       amount--;
     }
@@ -291,7 +297,8 @@ void SurfaceFinder::sortIndices() {
   // Record the indices and sort by height
   for (size_t i = 0; i < cloud_indices_->indices.size(); i++) {
     const PointC& pt = cloud_->points[cloud_indices_->indices[i]];
-    std::map<double, std::vector<int> >::iterator iter = sortedIndices_.find(pt.z);
+    std::map<double, std::vector<int> >::iterator iter =
+        sortedIndices_.find(pt.z);
     if (iter != sortedIndices_.end()) {
       sortedIndices_[pt.z].push_back(cloud_indices_->indices[i]);
     } else {
@@ -301,4 +308,4 @@ void SurfaceFinder::sortIndices() {
     }
   }
 }
-}
+}  // namespace surface_perception

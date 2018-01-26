@@ -130,13 +130,15 @@ class Segmentation {
 /// \param[in] indices The indices in the point cloud to find a surface in.
 /// \param[in] horizontal_tolerance_degrees The tolerance, in degrees, for a
 ///   surface to be considered horizontal.
-/// \param[out] surfaces The vector of detected surfaces (may be changed even if no surface
+/// \param[out] surfaces The vector of detected surfaces (may be changed even if
+/// no surface
 ///   is found).
 ///
 /// \returns true if a surface was found, false otherwise.
 bool FindSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                  pcl::PointIndicesPtr indices,
-                 double horizontal_tolerance_degrees, std::vector<Surface>* surfaces);
+                 double horizontal_tolerance_degrees,
+                 std::vector<Surface>* surfaces);
 
 /// \brief Extracts the part of the point cloud above a given surface.
 ///
@@ -174,12 +176,14 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
 ///   cluster for that cluster to be considered an object.
 /// \param[in] max_cluster_size The maximum number of points that can be in a
 ///   cluster for that cluster to be considered an object.
-/// \param[out] surfaces_objects_vec The vector of surfaces and the objects above each surface that were
+/// \param[out] surfaces_objects_vec The vector of surfaces and the objects
+/// above each surface that were
 ///   found.
 ///
 /// \returns true if the segmentation was successful, false otherwise.
 bool FindObjectsOnSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-                          pcl::PointIndicesPtr indices, const std::vector<Surface>& surface_vec,
+                          pcl::PointIndicesPtr indices,
+                          const std::vector<Surface>& surface_vec,
                           double margin_above_surface, double cluster_distance,
                           int min_cluster_size, int max_cluster_size,
                           std::vector<SurfaceObjects>* surfaces_objects_vec);

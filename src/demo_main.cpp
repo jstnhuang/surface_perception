@@ -25,8 +25,7 @@ class Demo {
 };
 
 Demo::Demo(const SurfaceViz& viz, const ros::Publisher input_pub)
-    : viz_(viz),
-      input_pub_(input_pub) {}
+    : viz_(viz), input_pub_(input_pub) {}
 
 void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   PointCloudC::Ptr pcl_cloud(new PointCloudC);
@@ -94,8 +93,8 @@ int main(int argc, char** argv) {
 
   ros::Publisher marker_pub =
       nh.advertise<visualization_msgs::Marker>("surface_objects", 20);
-  ros::Publisher cropped_input_pub =
-      nh.advertise<sensor_msgs::PointCloud2>("demo_cropped_input_cloud", 1, true);
+  ros::Publisher cropped_input_pub = nh.advertise<sensor_msgs::PointCloud2>(
+      "demo_cropped_input_cloud", 1, true);
 
   SurfaceViz viz(marker_pub);
   Demo demo(viz, cropped_input_pub);
