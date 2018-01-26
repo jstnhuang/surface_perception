@@ -92,13 +92,13 @@ bool FindSurface(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   SurfaceFinder surfaceFinder;
   std::vector<pcl::PointIndices::Ptr> indices_vec;
   std::vector<pcl::ModelCoefficients> coeffs_vec;
-  surfaceFinder.setCloud(cloud);
-  surfaceFinder.setCloudIndices(indices);
-  surfaceFinder.setMaxIteration(1000);
-  surfaceFinder.setSurfacePointThreshold(3000);
-  surfaceFinder.setToleranceAngle(5.0);
-  surfaceFinder.setMaxPointDistance(0.01);
-  surfaceFinder.exploreSurfaces(0, 10, &indices_vec, &coeffs_vec);
+  surfaceFinder.set_cloud(cloud);
+  surfaceFinder.set_cloud_indices(indices);
+  surfaceFinder.set_min_iteration(1000);
+  surfaceFinder.set_surface_point_threshold(3000);
+  surfaceFinder.set_angle_tolerance(5.0);
+  surfaceFinder.set_max_point_distance(0.01);
+  surfaceFinder.ExploreSurfaces(0, 10, &indices_vec, &coeffs_vec);
 
   if (indices_vec.size() == 0 || coeffs_vec.size() == 0) {
     ROS_INFO("Warning: no surface found.");

@@ -120,12 +120,13 @@ namespace surface_perception {
 SurfaceFinder::SurfaceFinder()
     : cloud_(new PointCloudC),
       cloud_indices_(new pcl::PointIndices),
-      rad_(0.0),
-      dist_(0.01),
-      max_iter_(100),
-      sortedIndices_() {}
+      angle_tolerance_(0.0),
+      max_point_distance_(0.01),
+      min_iteration_(100),
+      surface_point_threshold_(1000),
+      sorted_indices_() {}
 
-void SurfaceFinder::setCloud(const PointCloudC::Ptr& cloud) {
+void SurfaceFinder::set_cloud(const PointCloudC::Ptr& cloud) {
   cloud_ = cloud;
 
   // Fill up indices, if the indices is not specified yet
@@ -137,35 +138,36 @@ void SurfaceFinder::setCloud(const PointCloudC::Ptr& cloud) {
     cloud_indices_->header.frame_id = cloud_->header.frame_id;
   }
 
-  sortIndices();
+  SortIndices();
 }
 
-void SurfaceFinder::setCloudIndices(const pcl::PointIndices::Ptr indices) {
-  cloud_indices_->header.frame_id = indices->header.frame_id;
-  cloud_indices_->indices = indices->indices;
+void SurfaceFinder::set_cloud_indices(const pcl::PointIndices::Ptr cloud_indices) {
+  cloud_indices_->header.frame_id = cloud_indices->header.frame_id;
+  cloud_indices_->indices = cloud_indices->indices;
 
-  sortIndices();
+  SortIndices();
 }
 
-void SurfaceFinder::setToleranceAngle(const double& degrees) {
-  rad_ = pcl::deg2rad(degrees);
+void SurfaceFinder::set_angle_tolerance(const double& angle_tolerance) {
+  angle_tolerance_ = pcl::deg2rad(angle_tolerance);
 }
 
-void SurfaceFinder::setMaxPointDistance(const double& dist) { dist_ = dist; }
+void SurfaceFinder::set_max_point_distance(const double& max_point_distance) { max_point_distance_ = max_point_distance; }
 
-void SurfaceFinder::setMaxIteration(const size_t& max_iter) {
-  max_iter_ = max_iter;
+void SurfaceFinder::set_min_iteration(const size_t& min_iteration) {
+  min_iteration_ = min_iteration;
 }
 
-void SurfaceFinder::setSurfacePointThreshold(const size_t& min_point) {
-  min_point_ = min_point;
+void SurfaceFinder::set_surface_point_threshold(const size_t& surface_point_threshold) {
+  surface_point_threshold_ = surface_point_threshold;
 }
 
-void SurfaceFinder::exploreSurfaces(
+void SurfaceFinder::ExploreSurfaces(
     const size_t& min_surface_amount, const size_t& max_surface_amount,
     std::vector<pcl::PointIndices::Ptr>* indices_internals,
     std::vector<pcl::ModelCoefficients>* coeffs,
     std::vector<PointCloudC::Ptr>* history) {
+
   // Algorithm overview:
   // 1. Get a point randomly from cloud_->points, which is a vector<PointCloudC>
   // 2. Calculate the horizontal plane
@@ -189,8 +191,8 @@ void SurfaceFinder::exploreSurfaces(
   // Timer start point
   time_t start = std::time(0);
 
-  // Sample max_iter_ of horizontal surfaces
-  while (num_surface < max_iter_ || ranking.size() < min_surface_amount) {
+  // Sample min_iteration_ of horizontal surfaces
+  while (num_surface < min_iteration_ || ranking.size() < min_surface_amount) {
     pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients);
     coeff->values.resize(4);
     pcl::PointIndices::Ptr indices(new pcl::PointIndices);
@@ -201,7 +203,7 @@ void SurfaceFinder::exploreSurfaces(
 
     // Count points within given distance to the plane
     std::vector<int> inlier_indices;
-    filterIndices(dist_, sortedIndices_, pt.z, &inlier_indices);
+    filterIndices(max_point_distance_, sorted_indices_, pt.z, &inlier_indices);
 
     // Establish coefficients
     coeff->values[0] = 0;
@@ -211,7 +213,7 @@ void SurfaceFinder::exploreSurfaces(
     indices->indices = inlier_indices;
 
     // Check surface point threshold
-    if (indices->indices.size() > min_point_) {
+    if (indices->indices.size() > surface_point_threshold_) {
       // Update plane choices
       bool qualify = true;
       bool pre_exist = false;
@@ -226,7 +228,7 @@ void SurfaceFinder::exploreSurfaces(
         old_indices_size = it->first;
 
         // If newly found surface is better, replace
-        if (isSimilar(dist_, old_coeff, *coeff)) {
+        if (isSimilar(max_point_distance_, old_coeff, *coeff)) {
           if (old_indices_size < indices->indices.size()) {
             ranking.erase(it);
             pre_exist = true;
@@ -291,20 +293,20 @@ void SurfaceFinder::exploreSurfaces(
   }
 }
 
-void SurfaceFinder::sortIndices() {
-  sortedIndices_.clear();
+void SurfaceFinder::SortIndices() {
+  sorted_indices_.clear();
 
   // Record the indices and sort by height
   for (size_t i = 0; i < cloud_indices_->indices.size(); i++) {
     const PointC& pt = cloud_->points[cloud_indices_->indices[i]];
     std::map<double, std::vector<int> >::iterator iter =
-        sortedIndices_.find(pt.z);
-    if (iter != sortedIndices_.end()) {
-      sortedIndices_[pt.z].push_back(cloud_indices_->indices[i]);
+        sorted_indices_.find(pt.z);
+    if (iter != sorted_indices_.end()) {
+      sorted_indices_[pt.z].push_back(cloud_indices_->indices[i]);
     } else {
       std::vector<int> indices_vec;
       indices_vec.push_back(cloud_indices_->indices[i]);
-      sortedIndices_[pt.z] = indices_vec;
+      sorted_indices_[pt.z] = indices_vec;
     }
   }
 }

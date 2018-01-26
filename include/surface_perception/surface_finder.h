@@ -42,18 +42,73 @@ class SurfaceFinder {
   /// \brief Default constructor
   SurfaceFinder();
 
-  /// \brief Set the input point cloud
+  /// \brief Set the input point cloud.
   ///
-  /// \param NaN values in the input cloud should be removed before being passed
-  /// to this function.
-  void setCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud);
+  /// \param[in] cloud 	The input cloud for surface detection. NaN values in
+  ///  the input cloud should be removed before being passed to this function.
+  void set_cloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud);
 
-  void setCloudIndices(const pcl::PointIndices::Ptr indices);
-  void setToleranceAngle(const double& degrees);
-  void setMaxPointDistance(const double& dist);
-  void setMaxIteration(const size_t& max_iter);
-  void setSurfacePointThreshold(const size_t& min_point);
-  void exploreSurfaces(
+  /// \brief Set the indices of the input point cloud.
+  ///
+  /// \param[i] cloud_indices The indices of the input point cloud.
+  void set_cloud_indices(const pcl::PointIndices::Ptr cloud_indices);
+
+  /// \brief Set the angle of the surface compare to horizontal surface
+  ///
+  /// Because the current state algorithm only search for horizontal surfaces,
+  /// the angle set through this function is not used in surface detection.
+  ///
+  /// \param[in] angle_tolerance The maximum angle difference between a
+  ///  surface candidate against a horizontal surface.
+  void set_angle_tolerance(const double& angle_tolerance);
+
+  /// \brief Set the maximum distance for a point to be considered part of
+  /// surfaces.
+  ///
+  /// \param[in] max_point_distance The maximum distance between a point and
+  ///  a plane that represents the surface.
+  void set_max_point_distance(const double& max_point_distance);
+
+  /// \brief Set the minimum number of iterations for the algorithm to find surfaces
+  ///
+  /// The algorithm is designed to run at least the given number of iteration or
+  /// finding the specified minimum number of surfaces in a given scene.
+  ///
+  /// \param[in] min_iteration The minimum number of iteration required before
+  ///  the algorithm can stop search for surfaces.
+  void set_min_iteration(const size_t& min_iteration);
+
+  /// \brief Set the minimum amount of points contained by a surface candidate.
+  ///
+  /// The amount of points for a surface is indicated by the number of points
+  /// reside within the maximum distance of a plane. As the algorithm explores
+  /// surfaces, the surface that have points less that required amount will be
+  /// considered a candidate.
+  ///
+  /// \param[in] surface_point_threshold The minimum number of points a surface
+  ///  candidate must have.
+  void set_surface_point_threshold(const size_t& surface_point_threshold);
+
+  /// \brief Find the horizontal surfaces in a point cloud scene
+  ///
+  /// The algorithm attempts to surfaces in a point cloud scene and terminate if all
+  /// of the following conditions are met:
+  ///  1. The algorithm finds the minimum number of surface required.
+  ///  2. The algorithm finishes the specified number of iteration.
+  ///
+  /// Once the surfaces are found, the surface i has:
+  ///  1. indices as indices_iternals[i]
+  ///  2. coefficients as coeffs[i]
+  ///  3. point cloud history as history[i]
+  ///
+  /// \param[in] min_surface_amount The minimum number of surface must be found before
+  ///  the algorithm stops.
+  /// \param[in] max_surface_amount The maximum number of surface in the output.
+  /// \param[out] indices_internals The indices for of each output surface.
+  /// \param[out] coeffs The coefficients of planes that represent each surface.
+  /// \param[out] history The concatenated point cloud that represents the evolution
+  ///  of each surface.
+  void ExploreSurfaces(
       const size_t& min_surface_amount, const size_t& max_surface_amount,
       std::vector<pcl::PointIndices::Ptr>* indices_internals,
       std::vector<pcl::ModelCoefficients>* coeffs,
@@ -63,12 +118,12 @@ class SurfaceFinder {
  private:
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
   pcl::PointIndices::Ptr cloud_indices_;
-  double rad_;
-  double dist_;
-  size_t max_iter_;
-  size_t min_point_;
-  std::map<double, std::vector<int> > sortedIndices_;
-  void sortIndices();
+  double angle_tolerance_;
+  double max_point_distance_;
+  size_t min_iteration_;
+  size_t surface_point_threshold_;
+  std::map<double, std::vector<int> > sorted_indices_;
+  void SortIndices();
 };
 }  // namespace surface_perception
 
