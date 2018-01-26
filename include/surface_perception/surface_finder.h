@@ -50,7 +50,7 @@ class SurfaceFinder {
 
   /// \brief Set the indices of the input point cloud.
   ///
-  /// \param[i] cloud_indices The indices of the input point cloud.
+  /// \param[in] cloud_indices The indices of the input point cloud.
   void set_cloud_indices(const pcl::PointIndices::Ptr cloud_indices);
 
   /// \brief Set the angle of the surface compare to horizontal surface
