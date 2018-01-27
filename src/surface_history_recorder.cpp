@@ -13,20 +13,21 @@ typedef pcl::PointXYZRGB PointC;
 typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudC;
 
 namespace surface_perception {
-void SurfaceHistoryRecorder::record(const size_t& id,
+void SurfaceHistoryRecorder::Record(const size_t& id,
                                     const PointCloudC::Ptr& full_cloud,
                                     const pcl::PointIndices::Ptr& indices,
                                     const size_t& iteration) {
-  update(0, id, full_cloud, indices, iteration);
+  Update(0, id, full_cloud, indices, iteration);
 }
 
-void SurfaceHistoryRecorder::update(const size_t& old_id, const size_t& new_id,
+void SurfaceHistoryRecorder::Update(const size_t& old_id, const size_t& new_id,
                                     const PointCloudC::Ptr& full_cloud,
                                     const pcl::PointIndices::Ptr& indices,
                                     const size_t& iteration) {
   if (new_id == 0) {
     ROS_INFO(
-        "Warning: SurfaceHistoryRecorder doesn't record indices of size 0");
+        "Warning: Update(...) doesn't record id 0. Please use Record(...), "
+        "instead.");
     return;
   }
 
@@ -47,7 +48,7 @@ void SurfaceHistoryRecorder::update(const size_t& old_id, const size_t& new_id,
   iter_history_[new_id] = iteration;
 }
 
-void SurfaceHistoryRecorder::getCloud(
+void SurfaceHistoryRecorder::GetCloudHistory(
     const size_t& id, const PointCloudC::Ptr output_cloud) const {
   std::map<size_t, PointCloudC::Ptr>::const_iterator iter =
       cloud_history_.find(id);
@@ -56,14 +57,15 @@ void SurfaceHistoryRecorder::getCloud(
   }
 }
 
-void SurfaceHistoryRecorder::getTime(const size_t& id, time_t* time_ptr) const {
+void SurfaceHistoryRecorder::GetTimeSpent(const size_t& id,
+                                          time_t* time_ptr) const {
   std::map<size_t, time_t>::const_iterator iter = time_history_.find(id);
   if (iter != time_history_.end()) {
     *time_ptr = iter->second;
   }
 }
 
-void SurfaceHistoryRecorder::getIteration(const size_t& id,
+void SurfaceHistoryRecorder::GetIteration(const size_t& id,
                                           size_t* iter_ptr) const {
   std::map<size_t, size_t>::const_iterator iter = iter_history_.find(id);
   if (iter != iter_history_.end()) {

@@ -26,16 +26,16 @@ namespace surface_perception {
 /// \b Example usage:
 /// \code
 ///   SurfaceFinder finder;
-///   finder.setCloud(pcl_cloud);
-///   finder.setCloudIndices(point_indices);
-///   finder.setToleranceAngle(10);
-///   finder.setMaxPointDistance(0.01);
-///   finder.setMaxIteration(1000);
-///   finder.setSurfacePointThreshold(10000);
+///   finder.set_cloud(pcl_cloud);
+///   finder.set_cloud_indices(point_indices);
+///   finder.set_angle_tolerance(10);
+///   finder.set_max_point_distance(0.01);
+///   finder.set_min_iteration(1000);
+///   finder.set_surface_point_threshold(10000);
 ///
 ///   std::vector<pcl::PointIndices::Ptr> indices;
 ///   std::vector<pcl::ModelCoefficients> coeffs;
-///   finder.exploreSurfaces(0, 10, &indices, &coeffs);
+///   finder.ExploreSurfaces(0, 10, &indices, &coeffs);
 /// \endcode
 class SurfaceFinder {
  public:

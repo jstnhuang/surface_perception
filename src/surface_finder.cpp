@@ -141,7 +141,8 @@ void SurfaceFinder::set_cloud(const PointCloudC::Ptr& cloud) {
   SortIndices();
 }
 
-void SurfaceFinder::set_cloud_indices(const pcl::PointIndices::Ptr cloud_indices) {
+void SurfaceFinder::set_cloud_indices(
+    const pcl::PointIndices::Ptr cloud_indices) {
   cloud_indices_->header.frame_id = cloud_indices->header.frame_id;
   cloud_indices_->indices = cloud_indices->indices;
 
@@ -152,13 +153,16 @@ void SurfaceFinder::set_angle_tolerance(const double& angle_tolerance) {
   angle_tolerance_ = pcl::deg2rad(angle_tolerance);
 }
 
-void SurfaceFinder::set_max_point_distance(const double& max_point_distance) { max_point_distance_ = max_point_distance; }
+void SurfaceFinder::set_max_point_distance(const double& max_point_distance) {
+  max_point_distance_ = max_point_distance;
+}
 
 void SurfaceFinder::set_min_iteration(const size_t& min_iteration) {
   min_iteration_ = min_iteration;
 }
 
-void SurfaceFinder::set_surface_point_threshold(const size_t& surface_point_threshold) {
+void SurfaceFinder::set_surface_point_threshold(
+    const size_t& surface_point_threshold) {
   surface_point_threshold_ = surface_point_threshold;
 }
 
@@ -167,7 +171,6 @@ void SurfaceFinder::ExploreSurfaces(
     std::vector<pcl::PointIndices::Ptr>* indices_internals,
     std::vector<pcl::ModelCoefficients>* coeffs,
     std::vector<PointCloudC::Ptr>* history) {
-
   // Algorithm overview:
   // 1. Get a point randomly from cloud_->points, which is a vector<PointCloudC>
   // 2. Calculate the horizontal plane
@@ -243,10 +246,10 @@ void SurfaceFinder::ExploreSurfaces(
             coeff, indices);
         ranking[indices->indices.size()] = pr;
         if (pre_exist) {
-          recorder.update(old_indices_size, indices->indices.size(), cloud_,
+          recorder.Update(old_indices_size, indices->indices.size(), cloud_,
                           indices, num_surface);
         } else {
-          recorder.record(indices->indices.size(), cloud_, indices,
+          recorder.Record(indices->indices.size(), cloud_, indices,
                           num_surface);
         }
       }
@@ -274,9 +277,9 @@ void SurfaceFinder::ExploreSurfaces(
       time_t elapsed_time;
       size_t iter_amount;
       PointCloudC::Ptr past_cloud(new PointCloudC);
-      recorder.getCloud(indices->indices.size(), past_cloud);
-      recorder.getTime(indices->indices.size(), &elapsed_time);
-      recorder.getIteration(indices->indices.size(), &iter_amount);
+      recorder.GetCloudHistory(indices->indices.size(), past_cloud);
+      recorder.GetTimeSpent(indices->indices.size(), &elapsed_time);
+      recorder.GetIteration(indices->indices.size(), &iter_amount);
 
       history->push_back(past_cloud);
 
