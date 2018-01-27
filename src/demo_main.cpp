@@ -56,7 +56,7 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   ros::param::param("horizontal_tolerance_degrees",
                     horizontal_tolerance_degrees, 10.0);
   double margin_above_surface;
-  ros::param::param("margin_above_surface", margin_above_surface, 0.01);
+  ros::param::param("margin_above_surface", margin_above_surface, 0.015);
   double cluster_distance;
   ros::param::param("cluster_distance", cluster_distance, 0.015);
   int min_cluster_size;
