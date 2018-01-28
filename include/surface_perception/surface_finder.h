@@ -69,7 +69,8 @@ class SurfaceFinder {
   ///  a plane that represents the surface.
   void set_max_point_distance(const double& max_point_distance);
 
-  /// \brief Set the minimum number of iterations for the algorithm to find surfaces
+  /// \brief Set the minimum number of iterations for the algorithm to find
+  /// surfaces
   ///
   /// The algorithm is designed to run at least the given number of iteration or
   /// finding the specified minimum number of surfaces in a given scene.
@@ -91,8 +92,8 @@ class SurfaceFinder {
 
   /// \brief Find the horizontal surfaces in a point cloud scene
   ///
-  /// The algorithm attempts to surfaces in a point cloud scene and terminate if all
-  /// of the following conditions are met:
+  /// The algorithm attempts to surfaces in a point cloud scene and terminate if
+  /// all of the following conditions are met:
   ///  1. The algorithm finds the minimum number of surface required.
   ///  2. The algorithm finishes the specified number of iteration.
   ///
@@ -101,12 +102,14 @@ class SurfaceFinder {
   ///  2. coefficients as coeffs[i]
   ///  3. point cloud history as history[i]
   ///
-  /// \param[in] min_surface_amount The minimum number of surface must be found before
+  /// \param[in] min_surface_amount The minimum number of surface must be found
+  /// before
   ///  the algorithm stops.
   /// \param[in] max_surface_amount The maximum number of surface in the output.
   /// \param[out] indices_internals The indices for of each output surface.
   /// \param[out] coeffs The coefficients of planes that represent each surface.
-  /// \param[out] history The concatenated point cloud that represents the evolution
+  /// \param[out] history The concatenated point cloud that represents the
+  /// evolution
   ///  of each surface.
   void ExploreSurfaces(
       const size_t& min_surface_amount, const size_t& max_surface_amount,

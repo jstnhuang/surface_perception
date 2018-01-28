@@ -88,8 +88,9 @@ class SurfaceHistoryRecorder {
   ///
   /// \param[in] id The identification number of the surface.
   /// \param[out] output_cloud The concatenated point cloud history as output.
-  void GetCloudHistory(const size_t& id,
-                       pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud) const;
+  void GetCloudHistory(
+      const size_t& id,
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud) const;
 
   /// \brief Output the latest time spent when the surface is found.
   ///

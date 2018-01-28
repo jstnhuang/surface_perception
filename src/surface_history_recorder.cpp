@@ -25,8 +25,7 @@ void SurfaceHistoryRecorder::Update(const size_t& old_id, const size_t& new_id,
                                     const pcl::PointIndices::Ptr& indices,
                                     const size_t& iteration) {
   if (new_id == 0) {
-    ROS_INFO(
-        "Warning: Update(...) doesn't update id to 0.");
+    ROS_INFO("Warning: Update(...) doesn't update id to 0.");
     return;
   }
 
