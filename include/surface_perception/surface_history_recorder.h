@@ -41,7 +41,7 @@ namespace surface_perception {
 ///  // Get the recorded result for surface i
 ///  pcl::PointCloud<pcl::PointXYZRGB>::Ptr surface_history(
 ///      new pcl::PointCloud<pcl::PointXYZRGB>);
-///  time_t time_spent;
+///  clock_t time_spent;
 ///  size_t latest_iteration;
 ///  recorder.GetCloudHistory(indices_of_surface_i->indices.size(),
 ///                           surface_history);
@@ -98,8 +98,8 @@ class SurfaceHistoryRecorder {
   /// the surface.
   ///
   /// \param[in] id The identification number of the surface.
-  /// \param[out] time_ptr The pointer to the recorded time_t value.
-  void GetTimeSpent(const size_t& id, time_t* time_ptr) const;
+  /// \param[out] time_ptr The pointer to the recorded clock_t value.
+  void GetTimeSpent(const size_t& id, clock_t* time_ptr) const;
 
   /// \brief Output the latest iteration number when the surface is found.
   ///
@@ -109,7 +109,7 @@ class SurfaceHistoryRecorder {
 
  private:
   std::map<size_t, pcl::PointCloud<pcl::PointXYZRGB>::Ptr> cloud_history_;
-  std::map<size_t, time_t> time_history_;
+  std::map<size_t, clock_t> time_history_;
   std::map<size_t, size_t> iteration_history_;
 };
 }  // namespace surface_perception

@@ -42,7 +42,7 @@ void SurfaceHistoryRecorder::Update(const size_t& old_id, const size_t& new_id,
   }
 
   cloud_history_[new_id] = new_cloud;
-  time_history_[new_id] = std::time(0);
+  time_history_[new_id] = std::clock();
   iteration_history_[new_id] = iteration;
 }
 
@@ -56,8 +56,8 @@ void SurfaceHistoryRecorder::GetCloudHistory(
 }
 
 void SurfaceHistoryRecorder::GetTimeSpent(const size_t& id,
-                                          time_t* time_ptr) const {
-  std::map<size_t, time_t>::const_iterator iter = time_history_.find(id);
+                                          clock_t* time_ptr) const {
+  std::map<size_t, clock_t>::const_iterator iter = time_history_.find(id);
   if (iter != time_history_.end()) {
     *time_ptr = iter->second;
   }

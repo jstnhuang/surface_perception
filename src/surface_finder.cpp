@@ -192,7 +192,7 @@ void SurfaceFinder::ExploreSurfaces(
   SurfaceHistoryRecorder recorder;
 
   // Timer start point
-  time_t start = std::time(0);
+  clock_t start = std::clock();
 
   // Sample min_iteration_ of horizontal surfaces
   while (num_surface < min_iteration_ || ranking.size() < min_surface_amount) {
@@ -274,7 +274,7 @@ void SurfaceFinder::ExploreSurfaces(
       indices_internals->push_back(indices);
       coeffs->push_back(coeff);
 
-      time_t elapsed_time;
+      clock_t elapsed_time;
       size_t iter_amount;
       PointCloudC::Ptr past_cloud(new PointCloudC);
       recorder.GetCloudHistory(indices->indices.size(), past_cloud);
@@ -286,7 +286,7 @@ void SurfaceFinder::ExploreSurfaces(
       ROS_INFO(
           "%f seconds spent at %ldth iteration for  %ldth surface with size "
           "%ld",
-          std::difftime(elapsed_time, start), iter_amount,
+          ((float)elapsed_time - start) / CLOCKS_PER_SEC, iter_amount,
           max_surface_amount - amount + 1, indices->indices.size());
 
       amount--;
