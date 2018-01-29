@@ -55,11 +55,11 @@ void SurfaceHistoryRecorder::GetCloudHistory(
   }
 }
 
-void SurfaceHistoryRecorder::GetTimeSpent(const size_t& id,
-                                          clock_t* time_ptr) const {
+void SurfaceHistoryRecorder::GetClock(const size_t& id,
+                                      clock_t* clock_ptr) const {
   std::map<size_t, clock_t>::const_iterator iter = time_history_.find(id);
   if (iter != time_history_.end()) {
-    *time_ptr = iter->second;
+    *clock_ptr = iter->second;
   }
 }
 

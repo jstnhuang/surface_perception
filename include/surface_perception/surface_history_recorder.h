@@ -13,7 +13,7 @@ namespace surface_perception {
 /// history of each surface.
 ///
 /// This class designed for SurfaceFinder in order to record the performance of
-/// the algorithm. In particular, SurfaceHistoryRecorder tracks time spent, the
+/// the algorithm. In particular, SurfaceHistoryRecorder tracks clock info, the
 /// latest iteration and the concatenated point cloud that represents the
 /// evolution of a surface.
 ///
@@ -41,11 +41,11 @@ namespace surface_perception {
 ///  // Get the recorded result for surface i
 ///  pcl::PointCloud<pcl::PointXYZRGB>::Ptr surface_history(
 ///      new pcl::PointCloud<pcl::PointXYZRGB>);
-///  clock_t time_spent;
+///  clock_t current_clock;
 ///  size_t latest_iteration;
 ///  recorder.GetCloudHistory(indices_of_surface_i->indices.size(),
 ///                           surface_history);
-///  recorder.GetTimeSpent(indices_of_surface_i->indices.size(), &time_spent);
+///  recorder.GetClock(indices_of_surface_i->indices.size(), &current_clock);
 ///  recorder.GetIteration(indices_of_surface_i->indices.size(),
 ///                        &last_iteration);
 /// \endcode
@@ -92,14 +92,15 @@ class SurfaceHistoryRecorder {
       const size_t& id,
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud) const;
 
-  /// \brief Output the latest time spent when the surface is found.
+  /// \brief Output the latest clock when the surface is found.
   ///
-  /// The time spent is defined as the time spent for the algorithm to find
-  /// the surface.
+  /// The clock indicates the system clock when the algorithm finds the surface.
+  /// The resultant clock info is expected to be used to calculate time spent
+  /// on finding a surface.
   ///
   /// \param[in] id The identification number of the surface.
-  /// \param[out] time_ptr The pointer to the recorded clock_t value.
-  void GetTimeSpent(const size_t& id, clock_t* time_ptr) const;
+  /// \param[out] clock_ptr The pointer to the recorded clock_t value.
+  void GetClock(const size_t& id, clock_t* clock_ptr) const;
 
   /// \brief Output the latest iteration number when the surface is found.
   ///

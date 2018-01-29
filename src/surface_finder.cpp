@@ -274,11 +274,11 @@ void SurfaceFinder::ExploreSurfaces(
       indices_internals->push_back(indices);
       coeffs->push_back(coeff);
 
-      clock_t elapsed_time;
+      clock_t elapsed_clock;
       size_t iter_amount;
       PointCloudC::Ptr past_cloud(new PointCloudC);
       recorder.GetCloudHistory(indices->indices.size(), past_cloud);
-      recorder.GetTimeSpent(indices->indices.size(), &elapsed_time);
+      recorder.GetClock(indices->indices.size(), &elapsed_clock);
       recorder.GetIteration(indices->indices.size(), &iter_amount);
 
       history->push_back(past_cloud);
@@ -286,7 +286,7 @@ void SurfaceFinder::ExploreSurfaces(
       ROS_INFO(
           "%f seconds spent at %ldth iteration for  %ldth surface with size "
           "%ld",
-          ((float)elapsed_time - start) / CLOCKS_PER_SEC, iter_amount,
+          ((float)elapsed_clock - start) / CLOCKS_PER_SEC, iter_amount,
           max_surface_amount - amount + 1, indices->indices.size());
 
       amount--;
