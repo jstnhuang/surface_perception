@@ -35,7 +35,9 @@ double calculateAngle(const double& a, const double& b, const double& c) {
 }
 
 /**
- * This function finds the coefficients of a plane equation, given three points
+ * This function finds the coefficients of a plane equation, given three points.
+ * The resultant plane will have the normal vector pointing towards the
+ * positive direction of z-axis.
  */
 void planeEquation(const std::vector<PointC>& pts, double* a, double* b,
                    double* c, double* d) {
@@ -45,6 +47,14 @@ void planeEquation(const std::vector<PointC>& pts, double* a, double* b,
        (pts[2].z - pts[0].z) * (pts[1].x - pts[0].x);
   *c = (pts[1].x - pts[0].x) * (pts[2].y - pts[0].y) -
        (pts[2].x - pts[0].x) * (pts[1].y - pts[0].y);
+
+  // Force normal vector to point towards positive direction z-axis
+  if (*c < 0.0) {
+    *a *= 1.0;
+    *b *= 1.0;
+    *c *= 1.0;
+  }
+
   *d = -1 * (*a) * pts[0].x - (*b) * pts[0].y - (*c) * pts[0].z;
 }
 
