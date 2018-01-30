@@ -350,7 +350,6 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
     double a, b, c, d;
     planeEquation(points, &a, &b, &c, &d);
     if (calculateAngle(a, b, c) > pcl::deg2rad(angle_tolerance_degree_)) {
-      iteration++;
       continue;
     }
 
@@ -367,6 +366,7 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
 
     // Update the best model
     if (covered_indices.size() >= new_indices_ptr->indices.size()) {
+      ROS_INFO("Refine!!!");
       new_indices_ptr->indices.clear();
       new_indices_ptr->indices = covered_indices;
       new_coeff_ptr->values.clear();

@@ -185,6 +185,12 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
     if (!success) {
       ROS_ERROR(
           "Error: extraction of indices above a horizontal surface failed");
+      for (size_t j = 0; j < surfaces.size(); j++) {
+        ROS_ERROR("Surface %ld at (%f, %f, %f)", j,
+                  surfaces[j].pose_stamped.pose.position.x,
+                  surfaces[j].pose_stamped.pose.position.y,
+                  surfaces[j].pose_stamped.pose.position.z);
+      }
       return false;
     }
 
