@@ -151,7 +151,7 @@ void SurfaceFinder::set_cloud_indices(
 
 void SurfaceFinder::set_angle_tolerance_degree(
     const double& angle_tolerance_degree) {
-  angle_tolerance_degree_ = pcl::deg2rad(angle_tolerance_degree);
+  angle_tolerance_degree_ = angle_tolerance_degree;
 }
 
 void SurfaceFinder::set_max_point_distance(const double& max_point_distance) {
@@ -171,7 +171,6 @@ void SurfaceFinder::ExploreSurfaces(
     const size_t& min_surface_amount, const size_t& max_surface_amount,
     std::vector<pcl::PointIndices::Ptr>* indices_internals,
     std::vector<pcl::ModelCoefficients>* coeffs) {
-
   bool debug = false;
 
   // Algorithm overview:
@@ -274,25 +273,31 @@ void SurfaceFinder::ExploreSurfaces(
       if (amount == 0) {
         break;
       }
-      pcl::ModelCoefficients& coeff = *(it->second.first);
-      pcl::PointIndices::Ptr indices = it->second.second;
-      indices_internals->push_back(indices);
-      coeffs->push_back(coeff);
+      pcl::ModelCoefficients::Ptr old_coeff_ptr = it->second.first;
+      pcl::PointIndices::Ptr old_indices_ptr = it->second.second;
 
       if (debug) {
         clock_t elapsed_clock;
         size_t iter_amount;
         PointCloudC::Ptr past_cloud(new PointCloudC);
-        recorder.GetCloudHistory(indices->indices.size(), past_cloud);
-        recorder.GetClock(indices->indices.size(), &elapsed_clock);
-        recorder.GetIteration(indices->indices.size(), &iter_amount);
+        recorder.GetCloudHistory(old_indices_ptr->indices.size(), past_cloud);
+        recorder.GetClock(old_indices_ptr->indices.size(), &elapsed_clock);
+        recorder.GetIteration(old_indices_ptr->indices.size(), &iter_amount);
 
         ROS_INFO(
             "%f seconds spent at %ldth iteration for  %ldth surface with size "
             "%ld",
             ((float)elapsed_clock - start) / CLOCKS_PER_SEC, iter_amount,
-            max_surface_amount - amount + 1, indices->indices.size());
+            max_surface_amount - amount + 1, old_indices_ptr->indices.size());
       }
+
+      pcl::ModelCoefficients::Ptr new_coeff_ptr(new pcl::ModelCoefficients);
+      pcl::PointIndices::Ptr new_indices_ptr(new pcl::PointIndices);
+      FitSurface(old_indices_ptr, old_coeff_ptr, new_indices_ptr,
+                 new_coeff_ptr);
+
+      indices_internals->push_back(new_indices_ptr);
+      coeffs->push_back(*new_coeff_ptr);
       amount--;
     }
   } else {
@@ -316,5 +321,72 @@ void SurfaceFinder::SortIndices() {
       sorted_indices_[pt.z] = indices_vec;
     }
   }
+}
+
+void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
+                               const pcl::ModelCoefficients::Ptr old_coeff_ptr,
+                               pcl::PointIndices::Ptr new_indices_ptr,
+                               pcl::ModelCoefficients::Ptr new_coeff_ptr) {
+  size_t iteration_each = min_iteration_;
+  size_t iteration = 0;
+
+  size_t max_num_points = old_indices_ptr->indices.size();
+  new_coeff_ptr->values.resize(4);
+  new_coeff_ptr->values = old_coeff_ptr->values;
+  new_indices_ptr->indices.clear();
+  new_indices_ptr->indices = old_indices_ptr->indices;
+
+  // Refine the surface given the indices
+  while (iteration < iteration_each && ros::ok()) {
+    // Only sample the result from the given set of points
+    size_t rand_indices[3];
+    sampleThreeNums(old_indices_ptr->indices.size(), 3, rand_indices);
+    std::vector<PointC> points;
+    points.resize(3);
+    for (size_t i = 0; i < points.size(); i++) {
+      points[i] = cloud_->points[old_indices_ptr->indices[rand_indices[i]]];
+    }
+
+    double a, b, c, d;
+    planeEquation(points, &a, &b, &c, &d);
+    if (calculateAngle(a, b, c) > pcl::deg2rad(angle_tolerance_degree_)) {
+      iteration++;
+      continue;
+    }
+
+    // Evaluate the quality of new tilted surface
+    std::vector<int> covered_indices;
+    for (size_t i = 0; i < old_indices_ptr->indices.size(); i++) {
+      const PointC& pt = cloud_->points[old_indices_ptr->indices[i]];
+      double dist = fabs(a * pt.x + b * pt.y + c * pt.z + d) /
+                    sqrt(pow(a, 2.0) + pow(b, 2.0) + pow(c, 2.0));
+      if (dist < max_point_distance_) {
+        covered_indices.push_back(old_indices_ptr->indices[i]);
+      }
+    }
+
+    // Update the best model
+    if (covered_indices.size() >= max_num_points) {
+      new_indices_ptr->indices.clear();
+      new_indices_ptr->indices = covered_indices;
+      new_coeff_ptr->values.clear();
+      new_coeff_ptr->values.resize(4);
+      new_coeff_ptr->values[0] = a;
+      new_coeff_ptr->values[1] = b;
+      new_coeff_ptr->values[2] = c;
+      new_coeff_ptr->values[3] = d;
+    }
+
+    if (!isSimilar(max_point_distance_, *old_coeff_ptr, *new_coeff_ptr)) {
+      ROS_ERROR("Surface %fx+%fy+%fz+%f is mutated into %fx+%fy+%fz+%f",
+                old_coeff_ptr->values[0], old_coeff_ptr->values[1],
+                old_coeff_ptr->values[2], old_coeff_ptr->values[3],
+                new_coeff_ptr->values[0], new_coeff_ptr->values[1],
+                new_coeff_ptr->values[2], new_coeff_ptr->values[3]);
+    }
+
+    iteration++;
+  }
+  return;
 }
 }  // namespace surface_perception

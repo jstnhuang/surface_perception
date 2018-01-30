@@ -122,6 +122,10 @@ class SurfaceFinder {
   size_t surface_point_threshold_;
   std::map<double, std::vector<int> > sorted_indices_;
   void SortIndices();
+  void FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
+                  const pcl::ModelCoefficients::Ptr old_coeff_ptr,
+                  pcl::PointIndices::Ptr new_indices_ptr,
+                  pcl::ModelCoefficients::Ptr new_coeff_ptr);
 };
 }  // namespace surface_perception
 
