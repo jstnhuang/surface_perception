@@ -43,8 +43,8 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
   double max_x, max_y, max_z, min_x, min_y, min_z;
   ros::param::param("crop_min_x", min_x, 0.0);
-  ros::param::param("crop_min_y", min_x, -0.5);
-  ros::param::param("crop_min_z", min_x, 0.05);
+  ros::param::param("crop_min_y", min_y, -0.5);
+  ros::param::param("crop_min_z", min_z, 0.05);
   ros::param::param("crop_max_x", max_x, 1.3);
   ros::param::param("crop_max_y", max_y, 0.5);
   ros::param::param("crop_max_z", max_z, 2.0);
@@ -88,7 +88,12 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   if (!success || surface_objects.size() == 0) {
     ROS_ERROR("Failed to segment scene!");
   } else {
-    ROS_INFO("Found %ld objects", surface_objects[0].objects.size());
+    size_t object_count = 0;
+    for (size_t i = 0; i < surface_objects.size(); i++) {
+      object_count += surface_objects[i].objects.size();
+    }
+    ROS_INFO("Found %ld surfaces with %ld objects",
+             surface_objects.size(), object_count);
   }
 
   viz_.Hide();

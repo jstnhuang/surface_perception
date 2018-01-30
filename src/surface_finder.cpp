@@ -366,7 +366,7 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
     }
 
     // Update the best model
-    if (covered_indices.size() >= max_num_points) {
+    if (covered_indices.size() >= new_indices_ptr->indices.size()) {
       new_indices_ptr->indices.clear();
       new_indices_ptr->indices = covered_indices;
       new_coeff_ptr->values.clear();
@@ -378,7 +378,7 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
     }
 
     if (!isSimilar(max_point_distance_, *old_coeff_ptr, *new_coeff_ptr)) {
-      ROS_ERROR("Surface %fx+%fy+%fz+%f is mutated into %fx+%fy+%fz+%f",
+      ROS_ERROR("Surface %fx+%fy+%fz+%f is mutated into %fx+%fy+%fz+%f incorrectly",
                 old_coeff_ptr->values[0], old_coeff_ptr->values[1],
                 old_coeff_ptr->values[2], old_coeff_ptr->values[3],
                 new_coeff_ptr->values[0], new_coeff_ptr->values[1],
