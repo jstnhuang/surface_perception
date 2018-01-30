@@ -55,6 +55,12 @@ void planeEquation(const std::vector<PointC>& pts, double* a, double* b,
     *c *= 1.0;
   }
 
+  // Force normal vector to be a unit vector
+  double denominator = sqrt(pow(*a, 2) + pow(*b, 2) + pow(*c, 2));
+  *a /= denominator;
+  *b /= denominator;
+  *c /= denominator;
+
   *d = -1 * (*a) * pts[0].x - (*b) * pts[0].y - (*c) * pts[0].z;
 }
 
@@ -365,12 +371,12 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
 
     // Evaluate the quality of new tilted surface
     std::vector<int> covered_indices;
-    for (size_t i = 0; i < old_indices_ptr->indices.size(); i++) {
-      const PointC& pt = cloud_->points[old_indices_ptr->indices[i]];
+    for (size_t i = 0; i < cloud_indices_->indices.size(); i++) {
+      const PointC& pt = cloud_->points[cloud_indices_->indices[i]];
       double dist = fabs(a * pt.x + b * pt.y + c * pt.z + d) /
                     sqrt(pow(a, 2.0) + pow(b, 2.0) + pow(c, 2.0));
       if (dist < max_point_distance_) {
-        covered_indices.push_back(old_indices_ptr->indices[i]);
+        covered_indices.push_back(cloud_indices_->indices[i]);
       }
     }
 
