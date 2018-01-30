@@ -120,7 +120,7 @@ namespace surface_perception {
 SurfaceFinder::SurfaceFinder()
     : cloud_(new PointCloudC),
       cloud_indices_(new pcl::PointIndices),
-      angle_tolerance_(0.0),
+      angle_tolerance_degree_(0.0),
       max_point_distance_(0.01),
       min_iteration_(100),
       surface_point_threshold_(1000),
@@ -149,28 +149,31 @@ void SurfaceFinder::set_cloud_indices(
   SortIndices();
 }
 
-void SurfaceFinder::set_angle_tolerance(const double& angle_tolerance) {
-  angle_tolerance_ = pcl::deg2rad(angle_tolerance);
+void SurfaceFinder::set_angle_tolerance_degree(
+    const double& angle_tolerance_degree) {
+  angle_tolerance_degree_ = pcl::deg2rad(angle_tolerance_degree);
 }
 
 void SurfaceFinder::set_max_point_distance(const double& max_point_distance) {
   max_point_distance_ = max_point_distance;
 }
 
-void SurfaceFinder::set_min_iteration(const size_t& min_iteration) {
+void SurfaceFinder::set_min_iteration(const int& min_iteration) {
   min_iteration_ = min_iteration;
 }
 
 void SurfaceFinder::set_surface_point_threshold(
-    const size_t& surface_point_threshold) {
+    const int& surface_point_threshold) {
   surface_point_threshold_ = surface_point_threshold;
 }
 
 void SurfaceFinder::ExploreSurfaces(
     const size_t& min_surface_amount, const size_t& max_surface_amount,
     std::vector<pcl::PointIndices::Ptr>* indices_internals,
-    std::vector<pcl::ModelCoefficients>* coeffs,
-    std::vector<PointCloudC::Ptr>* history) {
+    std::vector<pcl::ModelCoefficients>* coeffs) {
+
+  bool debug = false;
+
   // Algorithm overview:
   // 1. Get a point randomly from cloud_->points, which is a vector<PointCloudC>
   // 2. Calculate the horizontal plane
@@ -245,12 +248,14 @@ void SurfaceFinder::ExploreSurfaces(
         std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr> pr(
             coeff, indices);
         ranking[indices->indices.size()] = pr;
-        if (pre_exist) {
-          recorder.Update(old_indices_size, indices->indices.size(), cloud_,
-                          indices, num_surface);
-        } else {
-          recorder.Record(indices->indices.size(), cloud_, indices,
-                          num_surface);
+        if (debug) {
+          if (pre_exist) {
+            recorder.Update(old_indices_size, indices->indices.size(), cloud_,
+                            indices, num_surface);
+          } else {
+            recorder.Record(indices->indices.size(), cloud_, indices,
+                            num_surface);
+          }
         }
       }
     }
@@ -274,21 +279,20 @@ void SurfaceFinder::ExploreSurfaces(
       indices_internals->push_back(indices);
       coeffs->push_back(coeff);
 
-      clock_t elapsed_clock;
-      size_t iter_amount;
-      PointCloudC::Ptr past_cloud(new PointCloudC);
-      recorder.GetCloudHistory(indices->indices.size(), past_cloud);
-      recorder.GetClock(indices->indices.size(), &elapsed_clock);
-      recorder.GetIteration(indices->indices.size(), &iter_amount);
+      if (debug) {
+        clock_t elapsed_clock;
+        size_t iter_amount;
+        PointCloudC::Ptr past_cloud(new PointCloudC);
+        recorder.GetCloudHistory(indices->indices.size(), past_cloud);
+        recorder.GetClock(indices->indices.size(), &elapsed_clock);
+        recorder.GetIteration(indices->indices.size(), &iter_amount);
 
-      history->push_back(past_cloud);
-
-      ROS_INFO(
-          "%f seconds spent at %ldth iteration for  %ldth surface with size "
-          "%ld",
-          ((float)elapsed_clock - start) / CLOCKS_PER_SEC, iter_amount,
-          max_surface_amount - amount + 1, indices->indices.size());
-
+        ROS_INFO(
+            "%f seconds spent at %ldth iteration for  %ldth surface with size "
+            "%ld",
+            ((float)elapsed_clock - start) / CLOCKS_PER_SEC, iter_amount,
+            max_surface_amount - amount + 1, indices->indices.size());
+      }
       amount--;
     }
   } else {

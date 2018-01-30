@@ -40,11 +40,20 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
   pcl::CropBox<PointC> crop;
   crop.setInputCloud(pcl_cloud);
+
+  double max_x, max_y, max_z, min_x, min_y, min_z;
+  ros::param::param("crop_min_x", min_x, 0.0);
+  ros::param::param("crop_min_y", min_x, -0.5);
+  ros::param::param("crop_min_z", min_x, 0.05);
+  ros::param::param("crop_max_x", max_x, 1.3);
+  ros::param::param("crop_max_y", max_y, 0.5);
+  ros::param::param("crop_max_z", max_z, 2.0);
+
   Eigen::Vector4f min;
-  min << 0, -0.5, 0.05, 1;
+  min << min_x, min_y, min_z, 1;
   crop.setMin(min);
   Eigen::Vector4f max;
-  max << 1.3, 0.5, 2, 1;
+  max << max_x, max_y, max_z, 1;
   crop.setMax(max);
   crop.filter(point_indices->indices);
   crop.filter(*cropped_cloud);

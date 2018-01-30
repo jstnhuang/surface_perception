@@ -39,8 +39,9 @@ catkin_package(
   LIBRARIES
     surface_perception_segmentation
     surface_perception_shape_extraction
-    surface_perception_visualization
     surface_perception_surface_finder
+    surface_perception_surface_history_recorder
+    surface_perception_visualization
   CATKIN_DEPENDS
     geometry_msgs
     pcl_conversions
@@ -78,10 +79,12 @@ target_link_libraries(surface_perception_shape_extraction
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES})
 
-add_library(surface_perception_visualization src/visualization.cpp)
-add_dependencies(surface_perception_visualization ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(surface_perception_visualization
-  ${catkin_LIBRARIES})
+add_library(surface_perception_surface_finder src/surface_finder.cpp)
+add_dependencies(surface_perception_surface_finder ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(surface_perception_surface_finder
+  surface_perception_surface_history_recorder
+  ${catkin_LIBRARIES}
+)
 
 add_library(surface_perception_surface_history_recorder src/surface_history_recorder.cpp)
 add_dependencies(surface_perception_surface_history_recorder ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -89,12 +92,10 @@ target_link_libraries(surface_perception_surface_history_recorder
   ${catkin_LIBRARIES}
 )
 
-add_library(surface_perception_surface_finder src/surface_finder.cpp)
-add_dependencies(surface_perception_surface_finder ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(surface_perception_surface_finder
-  surface_perception_surface_history_recorder
-  ${catkin_LIBRARIES}
-)
+add_library(surface_perception_visualization src/visualization.cpp)
+add_dependencies(surface_perception_visualization ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(surface_perception_visualization
+  ${catkin_LIBRARIES})
 
 add_executable(surface_perception_demo src/demo_main.cpp)
 set_target_properties(surface_perception_demo PROPERTIES OUTPUT_NAME demo PREFIX "")
@@ -122,6 +123,8 @@ install(TARGETS
   surface_perception_demo
   surface_perception_segmentation
   surface_perception_shape_extraction
+  surface_perception_surface_finder
+  surface_perception_surface_history_recorder
   surface_perception_visualization
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

@@ -28,7 +28,7 @@ namespace surface_perception {
 ///   SurfaceFinder finder;
 ///   finder.set_cloud(pcl_cloud);
 ///   finder.set_cloud_indices(point_indices);
-///   finder.set_angle_tolerance(10);
+///   finder.set_angle_tolerance_degree(10);
 ///   finder.set_max_point_distance(0.01);
 ///   finder.set_min_iteration(1000);
 ///   finder.set_surface_point_threshold(10000);
@@ -58,9 +58,9 @@ class SurfaceFinder {
   /// Because the current state algorithm only search for horizontal surfaces,
   /// the angle set through this function is not used in surface detection.
   ///
-  /// \param[in] angle_tolerance The maximum angle difference between a
+  /// \param[in] angle_tolerance_degree The maximum angle difference between a
   ///  surface candidate against a horizontal surface.
-  void set_angle_tolerance(const double& angle_tolerance);
+  void set_angle_tolerance_degree(const double& angle_tolerance_degree);
 
   /// \brief Set the maximum distance for a point to be considered part of
   /// surfaces.
@@ -77,7 +77,7 @@ class SurfaceFinder {
   ///
   /// \param[in] min_iteration The minimum number of iteration required before
   ///  the algorithm can stop search for surfaces.
-  void set_min_iteration(const size_t& min_iteration);
+  void set_min_iteration(const int& min_iteration);
 
   /// \brief Set the minimum amount of points contained by a surface candidate.
   ///
@@ -88,7 +88,7 @@ class SurfaceFinder {
   ///
   /// \param[in] surface_point_threshold The minimum number of points a surface
   ///  candidate must have.
-  void set_surface_point_threshold(const size_t& surface_point_threshold);
+  void set_surface_point_threshold(const int& surface_point_threshold);
 
   /// \brief Find the horizontal surfaces in a point cloud scene
   ///
@@ -108,20 +108,15 @@ class SurfaceFinder {
   /// \param[in] max_surface_amount The maximum number of surface in the output.
   /// \param[out] indices_internals The indices for of each output surface.
   /// \param[out] coeffs The coefficients of planes that represent each surface.
-  /// \param[out] history The concatenated point cloud that represents the
-  /// evolution
-  ///  of each surface.
-  void ExploreSurfaces(
-      const size_t& min_surface_amount, const size_t& max_surface_amount,
-      std::vector<pcl::PointIndices::Ptr>* indices_internals,
-      std::vector<pcl::ModelCoefficients>* coeffs,
-      std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* history =
-          new std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>());
+  void ExploreSurfaces(const size_t& min_surface_amount,
+                       const size_t& max_surface_amount,
+                       std::vector<pcl::PointIndices::Ptr>* indices_internals,
+                       std::vector<pcl::ModelCoefficients>* coeffs);
 
  private:
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
   pcl::PointIndices::Ptr cloud_indices_;
-  double angle_tolerance_;
+  double angle_tolerance_degree_;
   double max_point_distance_;
   size_t min_iteration_;
   size_t surface_point_threshold_;
