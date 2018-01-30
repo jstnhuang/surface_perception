@@ -393,12 +393,15 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
       new_coeff_ptr->values[3] = d;
     }
 
+    // Check if the old surface is refined into a different surface
     if (!isSimilar(max_point_distance_, *old_coeff_ptr, *new_coeff_ptr)) {
-      ROS_ERROR("Surface %fx+%fy+%fz+%f is mutated into %fx+%fy+%fz+%f incorrectly",
-                old_coeff_ptr->values[0], old_coeff_ptr->values[1],
-                old_coeff_ptr->values[2], old_coeff_ptr->values[3],
-                new_coeff_ptr->values[0], new_coeff_ptr->values[1],
-                new_coeff_ptr->values[2], new_coeff_ptr->values[3]);
+      ROS_ERROR(
+          "Incorrect refinement: Surface %fx+%fy+%fz+%f is mutated into "
+          "%fx+%fy+%fz+%f",
+          old_coeff_ptr->values[0], old_coeff_ptr->values[1],
+          old_coeff_ptr->values[2], old_coeff_ptr->values[3],
+          new_coeff_ptr->values[0], new_coeff_ptr->values[1],
+          new_coeff_ptr->values[2], new_coeff_ptr->values[3]);
     }
 
     iteration++;

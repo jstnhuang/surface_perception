@@ -21,12 +21,7 @@
 namespace {
 bool SurfaceComparator(const surface_perception::Surface& s1,
                        const surface_perception::Surface& s2) {
-  double s1_intercept =
-      -1.0 * s1.coefficients->values[3] / s1.coefficients->values[2];
-  double s2_intercept =
-      -1.0 * s2.coefficients->values[3] / s2.coefficients->values[2];
-
-  return s1_intercept < s2_intercept;
+  return s1.pose_stamped.pose.position.z < s2.pose_stamped.pose.position.z;
 }
 
 }  // Anonymous namespace
@@ -175,8 +170,7 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
     float height_limit = std::numeric_limits<float>::max();
     pcl::PointIndices::Ptr above_surface_indices(new pcl::PointIndices);
     if (i != (surfaces.size() - 1)) {
-      height_limit = -1.0 * surfaces[i + 1].coefficients->values[3] /
-                     surfaces[i + 1].coefficients->values[2];
+      height_limit = surfaces[i + 1].pose_stamped.pose.position.z;
     }
 
     bool success = GetSceneAboveSurface(
@@ -190,8 +184,7 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
                   surfaces[j].pose_stamped.pose.position.x,
                   surfaces[j].pose_stamped.pose.position.y,
                   surfaces[j].pose_stamped.pose.position.z,
-                  surfaces[j].dimensions.x,
-                  surfaces[j].dimensions.y,
+                  surfaces[j].dimensions.x, surfaces[j].dimensions.y,
                   surfaces[j].dimensions.z);
       }
       return false;
