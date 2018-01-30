@@ -170,7 +170,9 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
     float height_limit = std::numeric_limits<float>::max();
     pcl::PointIndices::Ptr above_surface_indices(new pcl::PointIndices);
     if (i != (surfaces.size() - 1)) {
-      height_limit = surfaces[i + 1].pose_stamped.pose.position.z;
+      // Estimate the height using information computed through FitBox
+      height_limit = surfaces[i + 1].pose_stamped.pose.position.z -
+                     surfaces[i + 1].dimensions.z / 2.0;
     }
 
     bool success = GetSceneAboveSurface(
