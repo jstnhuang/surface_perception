@@ -25,7 +25,7 @@ typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudC;
 namespace {
 /**
  * This is a helper function for calculating angle between given plane and z
- * axis
+ * axis.
  */
 double calculateAngle(const double& a, const double& b, const double& c) {
   double denominator = sqrt(pow(a, 2) + pow(b, 2) + pow(c, 2));
@@ -36,7 +36,7 @@ double calculateAngle(const double& a, const double& b, const double& c) {
 
 /**
  * This function finds the coefficients of a plane equation, given three points.
- * The resultant plane will have the normal vector pointing towards the
+ * The resultant plane will have a unit normal vector pointing towards the
  * positive direction of z-axis.
  */
 void planeEquation(const std::vector<PointC>& pts, double* a, double* b,
@@ -48,11 +48,10 @@ void planeEquation(const std::vector<PointC>& pts, double* a, double* b,
   *c = (pts[1].x - pts[0].x) * (pts[2].y - pts[0].y) -
        (pts[2].x - pts[0].x) * (pts[1].y - pts[0].y);
 
-  // Force normal vector to point towards positive direction z-axis
   if (*c < 0.0) {
-    *a *= 1.0;
-    *b *= 1.0;
-    *c *= 1.0;
+    *a *= -1.0;
+    *b *= -1.0;
+    *c *= -1.0;
   }
 
   // Force normal vector to be a unit vector
@@ -136,7 +135,7 @@ namespace surface_perception {
 SurfaceFinder::SurfaceFinder()
     : cloud_(new PointCloudC),
       cloud_indices_(new pcl::PointIndices),
-      angle_tolerance_degree_(0.0),
+      angle_tolerance_degree_(5.0),
       max_point_distance_(0.01),
       min_iteration_(100),
       surface_point_threshold_(1000),
@@ -194,10 +193,11 @@ void SurfaceFinder::ExploreSurfaces(
   // 2. Calculate the horizontal plane
   // 3. Store the plane and rank it by number of points the plane covers
 
-  ROS_INFO("Start exploring surfaces in %ld indices of %s",
-           cloud_indices_->indices.size(),
-           cloud_indices_->header.frame_id.c_str());
-
+  if (debug) {
+    ROS_INFO("Start exploring surfaces in %ld indices of %s",
+             cloud_indices_->indices.size(),
+             cloud_indices_->header.frame_id.c_str());
+  }
   size_t num_surface = 0;
   size_t max_inlier_count = std::numeric_limits<size_t>::min();
   std::srand(unsigned(std::time(0)));
@@ -343,7 +343,7 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
                                const pcl::ModelCoefficients::Ptr old_coeff_ptr,
                                pcl::PointIndices::Ptr new_indices_ptr,
                                pcl::ModelCoefficients::Ptr new_coeff_ptr) {
-  size_t iteration_each = min_iteration_;
+  size_t iteration_each = min_iteration_ / 10;  // Use 10% of minimum iterations
   size_t iteration = 0;
 
   size_t max_num_points = old_indices_ptr->indices.size();
@@ -382,7 +382,6 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
 
     // Update the best model
     if (covered_indices.size() >= new_indices_ptr->indices.size()) {
-      ROS_INFO("Refine!!!");
       new_indices_ptr->indices.clear();
       new_indices_ptr->indices = covered_indices;
       new_coeff_ptr->values.clear();

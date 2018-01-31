@@ -135,9 +135,9 @@ class Segmentation {
 ///
 /// \returns true if a surface was found, false otherwise.
 bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-                 pcl::PointIndicesPtr indices,
-                 double horizontal_tolerance_degrees,
-                 std::vector<Surface>* surfaces);
+                  pcl::PointIndicesPtr indices,
+                  double horizontal_tolerance_degrees,
+                  std::vector<Surface>* surfaces);
 
 /// \brief Segments the objects above each of a list of surfaces.
 ///
@@ -161,8 +161,7 @@ bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
 bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                           pcl::PointIndicesPtr indices,
                           const pcl::ModelCoefficients& coefficients,
-                          double margin_above_surface,
-                          float height_limit,
+                          double margin_above_surface, float height_limit,
                           pcl::PointIndices::Ptr above_surface_indices);
 
 /// \brief The algorithm that segments objects above a given surface.
