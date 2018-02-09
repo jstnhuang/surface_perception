@@ -94,7 +94,7 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   surfaceFinder.set_surface_point_threshold(5000);
   surfaceFinder.set_angle_tolerance_degree(horizontal_tolerance_degrees);
   surfaceFinder.set_max_point_distance(margin_above_surface);
-  surfaceFinder.ExploreSurfaces(0, 10, &indices_vec, &coeffs_vec);
+  surfaceFinder.ExploreSurfaces(&indices_vec, &coeffs_vec);
 
   if (indices_vec.size() == 0 || coeffs_vec.size() == 0) {
     ROS_INFO("Warning: no surface found.");

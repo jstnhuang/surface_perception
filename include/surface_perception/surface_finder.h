@@ -90,6 +90,20 @@ class SurfaceFinder {
   ///   candidate must have.
   void set_surface_point_threshold(const int& surface_point_threshold);
 
+  /// \brief Set the minimum number of surfaces in the output of
+  ///   ExploreSurfaces.
+  ///
+  /// \param[in] min_surface_amount The specified number of surfaces that must
+  ///   be in the output of ExploreSurfaces.
+  void set_min_surface_amount(int min_surface_amount);
+
+  /// \brief Set the maximum number of the surfaces in the output of
+  ///   ExploreSurfaces.
+  ///
+  /// \param[in] max_surface_amount The upper bound of the surface amount that
+  ///   can not be exceeded in the output of ExploreSurfaces.
+  void set_max_surface_amount(int max_surface_amount);
+
   /// \brief Find the horizontal surfaces in a point cloud scene
   ///
   /// The algorithm attempts to surfaces in a point cloud scene and terminate if
@@ -100,16 +114,10 @@ class SurfaceFinder {
   /// Once the surfaces are found, the surface i has:
   ///  1. indices as indices_iternals[i]
   ///  2. coefficients as coeffs[i]
-  ///  3. point cloud history as history[i]
   ///
-  /// \param[in] min_surface_amount The minimum number of surface must be found
-  ///   before the algorithm stops.
-  /// \param[in] max_surface_amount The maximum number of surface in the output.
   /// \param[out] indices_internals The indices for of each output surface.
   /// \param[out] coeffs The coefficients of planes that represent each surface.
-  void ExploreSurfaces(const size_t& min_surface_amount,
-                       const size_t& max_surface_amount,
-                       std::vector<pcl::PointIndices::Ptr>* indices_internals,
+  void ExploreSurfaces(std::vector<pcl::PointIndices::Ptr>* indices_internals,
                        std::vector<pcl::ModelCoefficients>* coeffs);
 
  private:
@@ -119,6 +127,8 @@ class SurfaceFinder {
   double max_point_distance_;
   size_t min_iteration_;
   size_t surface_point_threshold_;
+  int min_surface_amount_;
+  int max_surface_amount_;
   std::map<double, std::vector<int> > sorted_indices_;
   void SortIndices();
   void FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,

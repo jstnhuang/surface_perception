@@ -146,6 +146,8 @@ SurfaceFinder::SurfaceFinder()
       max_point_distance_(0.01),
       min_iteration_(100),
       surface_point_threshold_(1000),
+      min_surface_amount_(0),
+      max_surface_amount_(10),
       sorted_indices_() {}
 
 void SurfaceFinder::set_cloud(const PointCloudC::Ptr& cloud) {
@@ -176,8 +178,15 @@ void SurfaceFinder::set_surface_point_threshold(
   surface_point_threshold_ = surface_point_threshold;
 }
 
+void SurfaceFinder::set_min_surface_amount(int min_surface_amount) {
+  min_surface_amount_ = min_surface_amount;
+}
+
+void SurfaceFinder::set_max_surface_amount(int max_surface_amount) {
+  max_surface_amount_ = max_surface_amount;
+}
+
 void SurfaceFinder::ExploreSurfaces(
-    const size_t& min_surface_amount, const size_t& max_surface_amount,
     std::vector<pcl::PointIndices::Ptr>* indices_internals,
     std::vector<pcl::ModelCoefficients>* coeffs) {
   bool debug = false;
@@ -216,7 +225,7 @@ void SurfaceFinder::ExploreSurfaces(
   clock_t start = std::clock();
 
   // Sample min_iteration_ of horizontal surfaces
-  while (num_surface < min_iteration_ || ranking.size() < min_surface_amount) {
+  while (num_surface < min_iteration_ || ranking.size() < min_surface_amount_) {
     pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients);
     coeff->values.resize(4);
     pcl::PointIndices::Ptr indices(new pcl::PointIndices);
@@ -283,7 +292,7 @@ void SurfaceFinder::ExploreSurfaces(
 
   //  Report surfaces
   if (ranking.size() > 0) {
-    size_t amount = max_surface_amount;
+    size_t amount = max_surface_amount_;
     for (std::map<
              size_t,
              std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr>,
@@ -307,7 +316,7 @@ void SurfaceFinder::ExploreSurfaces(
             "%f seconds spent at %ldth iteration for  %ldth surface with size "
             "%ld",
             ((float)elapsed_clock - start) / CLOCKS_PER_SEC, iter_amount,
-            max_surface_amount - amount + 1, old_indices_ptr->indices.size());
+            max_surface_amount_ - amount + 1, old_indices_ptr->indices.size());
       }
 
       pcl::ModelCoefficients::Ptr new_coeff_ptr(new pcl::ModelCoefficients);
