@@ -34,7 +34,8 @@ Segmentation::Segmentation()
       margin_above_surface_(0.005),
       cluster_distance_(0.01),
       min_cluster_size_(10),
-      max_cluster_size_(10000) {}
+      max_cluster_size_(10000),
+      min_surface_size_(5000) {}
 
 void Segmentation::set_input_cloud(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud) {
@@ -60,11 +61,14 @@ void Segmentation::set_min_cluster_size(int min_cluster_size) {
 void Segmentation::set_max_cluster_size(int max_cluster_size) {
   max_cluster_size_ = max_cluster_size;
 }
-
+void Segmentation::set_min_surface_size(int min_surface_size) {
+  min_surface_size_ = min_surface_size;
+}
 bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
   std::vector<Surface> surface_vec;
   bool success = FindSurfaces(cloud_, indices_, margin_above_surface_,
-                              horizontal_tolerance_degrees_, &surface_vec);
+                              horizontal_tolerance_degrees_, min_surface_size_,
+                              &surface_vec);
   if (!success) {
     ROS_ERROR("Failed to find any surface.");
     return false;
@@ -83,7 +87,7 @@ bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
 
 bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
                   double margin_above_surface,
-                  double horizontal_tolerance_degrees,
+                  double horizontal_tolerance_degrees, int min_surface_size,
                   std::vector<Surface>* surfaces) {
   SurfaceFinder surfaceFinder;
   std::vector<pcl::PointIndices::Ptr> indices_vec;
@@ -91,7 +95,7 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   surfaceFinder.set_cloud(cloud);
   surfaceFinder.set_cloud_indices(indices);
   surfaceFinder.set_min_iteration(1000);
-  surfaceFinder.set_surface_point_threshold(5000);
+  surfaceFinder.set_surface_point_threshold(min_surface_size);
   surfaceFinder.set_angle_tolerance_degree(horizontal_tolerance_degrees);
   surfaceFinder.set_max_point_distance(margin_above_surface);
   surfaceFinder.ExploreSurfaces(&indices_vec, &coeffs_vec);
@@ -109,14 +113,13 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
     FitBox(cloud, indices_vec[i], surface.coefficients,
            &surface.pose_stamped.pose, &surface.dimensions);
 
-    // Adjust the center of surface as well as the thickness of surface
+    // Adjust the center of surface
     double offset =
         surface.coefficients->values[0] * surface.pose_stamped.pose.position.x +
         surface.coefficients->values[1] * surface.pose_stamped.pose.position.y +
         surface.coefficients->values[2] * surface.pose_stamped.pose.position.z +
         surface.coefficients->values[3];
     surface.pose_stamped.pose.position.z -= offset;
-    //surface.dimensions.z *= 2.0;
     surfaces->push_back(surface);
   }
 

@@ -11,14 +11,14 @@
 #include "surface_perception/surface_objects.h"
 
 namespace surface_perception {
-/// \brief Segmentation is the algorithm for tabletop segmentation.
+/// \brief Segmentation is the algorithm for tabletop/shelf segmentation.
 ///
-/// This algorithm takes in a tabletop scene and segments it into a tabletop
-/// surface with some number of objects above it. The objects are segmented
-/// using a Euclidean clustering algorithm. The algorithm fits oriented bounding
-/// boxes around the surface and the objects. For each object, the z direction
-/// points "up," and the x direction points toward the shorter side of the
-/// oriented bounding box.
+/// This algorithm takes in a tabletop/shelf scene and segments it into
+/// surfaces with some number of objects above each surface.  The objects are
+/// segmented using a Euclidean clustering algorithm. For each surface, The
+/// algorithm fits oriented bounding boxes around the surface and the objects.
+/// For each object, the z direction points "up," and the x direction points
+/// toward the shorter side of the oriented bounding box.
 ///
 /// The algorithm assumes that the input scene is provided such that the
 /// positive z direction points "up."
@@ -33,13 +33,12 @@ namespace surface_perception {
 ///   seg.set_cluster_distance(0.01);
 ///   seg.set_min_cluster_size(10);
 ///   seg.set_max_cluster_size(10000);
+///   seg.set_min_surface_size(10000);
 ///
 ///   std::vector<SurfaceObjects> surface_objects;
 ///   bool success = seg.Segment(&surface_objects);
 /// \endcode
 ///
-/// In the future, we hope to extend this algorithm to automatically segment
-/// shelf scenes as well as tabletop scenes.
 class Segmentation {
  public:
   /// \brief Default constructor.
@@ -101,6 +100,16 @@ class Segmentation {
   ///   cluster for the cluster to be considered an object.
   void set_max_cluster_size(int max_cluster_size);
 
+  /// \brief Sets the minimum number of points a surface has to have.
+  ///
+  /// As the algorithm only considers surfaces with more than required number
+  /// of points as valid surfaces, the lower bound of surface size is used in
+  /// order to ignore invalid surfaces
+  ///
+  /// \param[in] min_surface_size The minimum requirement on number of points
+  ///   in a surface.
+  void set_min_surface_size(int min_surface_size);
+
   /// \brief Segments the scene.
   ///
   /// \param[out] surfaces The vector of SurfaceObjects to append to. This
@@ -121,6 +130,7 @@ class Segmentation {
   double cluster_distance_;
   int min_cluster_size_;
   int max_cluster_size_;
+  int min_surface_size_;
 };
 
 /// \brief Finds horizonal surfaces in the given point cloud.
@@ -128,17 +138,18 @@ class Segmentation {
 /// \param[in] cloud The point cloud to find a surface in, where positive z
 ///   points up.
 /// \param[in] indices The indices in the point cloud to find a surface in.
-/// \param[in] margin_above_surface The thickness of each surface.
+/// \param[in] margin_above_surface The maximum distance between a plane and a
+///   point, in order to be considered as part of a surface.
 /// \param[in] horizontal_tolerance_degrees The tolerance, in degrees, for a
 ///   surface to be considered horizontal.
+/// \param[in] min_surface_size The required number of points for a surface.
 /// \param[out] surfaces The vector of detected surfaces (may be changed even if
 ///   no surface is found).
 ///
 /// \returns true if a surface was found, false otherwise.
 bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-                  pcl::PointIndicesPtr indices,
-                  double margin_above_surface,
-                  double horizontal_tolerance_degrees,
+                  pcl::PointIndicesPtr indices, double margin_above_surface,
+                  double horizontal_tolerance_degrees, int min_surface_size,
                   std::vector<Surface>* surfaces);
 
 /// \brief Extracts the part of the point cloud above a given surface.

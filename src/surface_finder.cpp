@@ -118,8 +118,6 @@ bool isSimilar(const double& dist, const pcl::ModelCoefficients& plane1,
                const pcl::ModelCoefficients& plane2) {
   double z1 = -1.0 * plane1.values[3] / plane1.values[2];
   double z2 = -1.0 * plane2.values[3] / plane2.values[2];
-
-  // 
   return fabs(z1 - z2) < 2.0 * dist;
 }
 
@@ -150,9 +148,7 @@ SurfaceFinder::SurfaceFinder()
       max_surface_amount_(10),
       sorted_indices_() {}
 
-void SurfaceFinder::set_cloud(const PointCloudC::Ptr& cloud) {
-  cloud_ = cloud; 
-}
+void SurfaceFinder::set_cloud(const PointCloudC::Ptr& cloud) { cloud_ = cloud; }
 
 void SurfaceFinder::set_cloud_indices(
     const pcl::PointIndices::Ptr cloud_indices) {

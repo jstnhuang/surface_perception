@@ -72,6 +72,8 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   ros::param::param("min_cluster_size", min_cluster_size, 100);
   int max_cluster_size;
   ros::param::param("max_cluster_size", max_cluster_size, 5000);
+  int min_surface_size;
+  ros::param::param("min_surface_size", min_surface_size, 5000);
 
   surface_perception::Segmentation seg;
   seg.set_input_cloud(pcl_cloud);
@@ -81,6 +83,7 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   seg.set_cluster_distance(cluster_distance);
   seg.set_min_cluster_size(min_cluster_size);
   seg.set_max_cluster_size(max_cluster_size);
+  seg.set_min_surface_size(min_surface_size);
 
   std::vector<SurfaceObjects> surface_objects;
   bool success = seg.Segment(&surface_objects);
@@ -92,8 +95,8 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
     for (size_t i = 0; i < surface_objects.size(); i++) {
       object_count += surface_objects[i].objects.size();
     }
-    ROS_INFO("Found %ld surfaces with %ld objects",
-             surface_objects.size(), object_count);
+    ROS_INFO("Found %ld surfaces with %ld objects", surface_objects.size(),
+             object_count);
   }
 
   viz_.Hide();
