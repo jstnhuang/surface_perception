@@ -1,12 +1,12 @@
 #include "surface_perception/surface_finder.h"
 #include "surface_perception/surface_history_recorder.h"
 
-#include <limits.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
 #include <functional>
+#include <limits>
 #include <map>
 #include <utility>
 #include <vector>
