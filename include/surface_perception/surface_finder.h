@@ -35,7 +35,7 @@ namespace surface_perception {
 ///
 ///   std::vector<pcl::PointIndices::Ptr> indices;
 ///   std::vector<pcl::ModelCoefficients> coeffs;
-///   finder.ExploreSurfaces(0, 10, &indices, &coeffs);
+///   finder.ExploreSurfaces(&indices, &coeffs);
 /// \endcode
 class SurfaceFinder {
  public:
@@ -60,14 +60,14 @@ class SurfaceFinder {
   ///
   /// \param[in] angle_tolerance_degree The maximum angle difference between a
   ///   surface candidate against a horizontal surface.
-  void set_angle_tolerance_degree(const double& angle_tolerance_degree);
+  void set_angle_tolerance_degree(double angle_tolerance_degree);
 
   /// \brief Set the maximum distance for a point to be considered part of
   /// surfaces.
   ///
   /// \param[in] max_point_distance The maximum distance between a point and
   ///   a plane that represents the surface.
-  void set_max_point_distance(const double& max_point_distance);
+  void set_max_point_distance(double max_point_distance);
 
   /// \brief Set the minimum number of iterations for the algorithm to find
   /// surfaces
@@ -77,7 +77,7 @@ class SurfaceFinder {
   ///
   /// \param[in] min_iteration The minimum number of iteration required before
   ///   the algorithm can stop search for surfaces.
-  void set_min_iteration(const int& min_iteration);
+  void set_min_iteration(size_t min_iteration);
 
   /// \brief Set the minimum amount of points contained by a surface candidate.
   ///
@@ -88,21 +88,21 @@ class SurfaceFinder {
   ///
   /// \param[in] surface_point_threshold The minimum number of points a surface
   ///   candidate must have.
-  void set_surface_point_threshold(const int& surface_point_threshold);
+  void set_surface_point_threshold(size_t surface_point_threshold);
 
   /// \brief Set the minimum number of surfaces in the output of
   ///   ExploreSurfaces.
   ///
   /// \param[in] min_surface_amount The specified number of surfaces that must
   ///   be in the output of ExploreSurfaces.
-  void set_min_surface_amount(int min_surface_amount);
+  void set_min_surface_amount(size_t min_surface_amount);
 
   /// \brief Set the maximum number of the surfaces in the output of
   ///   ExploreSurfaces.
   ///
   /// \param[in] max_surface_amount The upper bound of the surface amount that
   ///   can not be exceeded in the output of ExploreSurfaces.
-  void set_max_surface_amount(int max_surface_amount);
+  void set_max_surface_amount(size_t max_surface_amount);
 
   /// \brief Find the horizontal surfaces in a point cloud scene
   ///
@@ -112,13 +112,14 @@ class SurfaceFinder {
   ///  2. The algorithm finishes the specified number of iteration.
   ///
   /// Once the surfaces are found, the surface i has:
-  ///  1. indices as indices_iternals[i]
-  ///  2. coefficients as coeffs[i]
+  ///  1. indices as indices_vec[i]
+  ///  2. coefficients as coeffs_vec[i]
   ///
-  /// \param[out] indices_internals The indices for of each output surface.
-  /// \param[out] coeffs The coefficients of planes that represent each surface.
-  void ExploreSurfaces(std::vector<pcl::PointIndices::Ptr>* indices_internals,
-                       std::vector<pcl::ModelCoefficients>* coeffs);
+  /// \param[out] indices_vec The indices for of each output surface.
+  /// \param[out] coeffs_vec The coefficients of planes that represent each
+  ///   surface.
+  void ExploreSurfaces(std::vector<pcl::PointIndices::Ptr>* indices_vec,
+                       std::vector<pcl::ModelCoefficients>* coeffs_vec);
 
  private:
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
@@ -127,8 +128,8 @@ class SurfaceFinder {
   double max_point_distance_;
   size_t min_iteration_;
   size_t surface_point_threshold_;
-  int min_surface_amount_;
-  int max_surface_amount_;
+  size_t min_surface_amount_;
+  size_t max_surface_amount_;
   std::map<double, std::vector<int> > sorted_indices_;
   void SortIndices();
   void FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,

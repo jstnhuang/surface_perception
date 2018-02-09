@@ -62,9 +62,8 @@ class SurfaceHistoryRecorder {
   /// \param[in] cloud The input cloud of SurfaceFinder.
   /// \param[in] indices The indices of the surface found.
   /// \param[in] iteration The iteration number when this surface is found.
-  void Record(const size_t& id,
-              const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud,
-              const pcl::PointIndices::Ptr& indices, const size_t& iteration);
+  void Record(size_t id, const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud,
+              const pcl::PointIndices::Ptr& indices, size_t iteration);
 
   /// \brief Update the existing surface data stored in this instance.
   ///
@@ -77,9 +76,9 @@ class SurfaceHistoryRecorder {
   /// \param[in] cloud The input point cloud of SurfaceFinder.
   /// \param[in] indices The indices of the surface found.
   /// \param[in] iteration The iteration number when the surface is found.
-  void Update(const size_t& old_id, const size_t& new_id,
+  void Update(size_t old_id, size_t new_id,
               const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud,
-              const pcl::PointIndices::Ptr& indices, const size_t& iteration);
+              const pcl::PointIndices::Ptr& indices, size_t iteration);
 
   /// \brief Output the point cloud history of a surface
   ///
@@ -89,8 +88,7 @@ class SurfaceHistoryRecorder {
   /// \param[in] id The identification number of the surface.
   /// \param[out] output_cloud The concatenated point cloud history as output.
   void GetCloudHistory(
-      const size_t& id,
-      pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud) const;
+      size_t id, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud) const;
 
   /// \brief Output the latest clock when the surface is found.
   ///
@@ -100,13 +98,13 @@ class SurfaceHistoryRecorder {
   ///
   /// \param[in] id The identification number of the surface.
   /// \param[out] clock_ptr The pointer to the recorded clock_t value.
-  void GetClock(const size_t& id, clock_t* clock_ptr) const;
+  void GetClock(size_t id, clock_t* clock_ptr) const;
 
   /// \brief Output the latest iteration number when the surface is found.
   ///
   /// \param[in] id The identification number of the surface.
   /// \param[out] iteration_ptr The pointer to the recorded iteration number.
-  void GetIteration(const size_t& id, size_t* iteration_ptr) const;
+  void GetIteration(size_t id, size_t* iteration_ptr) const;
 
  private:
   std::map<size_t, pcl::PointCloud<pcl::PointXYZRGB>::Ptr> cloud_history_;

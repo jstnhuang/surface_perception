@@ -156,35 +156,34 @@ void SurfaceFinder::set_cloud_indices(
   cloud_indices_->indices = cloud_indices->indices;
 }
 
-void SurfaceFinder::set_angle_tolerance_degree(
-    const double& angle_tolerance_degree) {
+void SurfaceFinder::set_angle_tolerance_degree(double angle_tolerance_degree) {
   angle_tolerance_degree_ = angle_tolerance_degree;
 }
 
-void SurfaceFinder::set_max_point_distance(const double& max_point_distance) {
+void SurfaceFinder::set_max_point_distance(double max_point_distance) {
   max_point_distance_ = max_point_distance;
 }
 
-void SurfaceFinder::set_min_iteration(const int& min_iteration) {
+void SurfaceFinder::set_min_iteration(size_t min_iteration) {
   min_iteration_ = min_iteration;
 }
 
 void SurfaceFinder::set_surface_point_threshold(
-    const int& surface_point_threshold) {
+    size_t surface_point_threshold) {
   surface_point_threshold_ = surface_point_threshold;
 }
 
-void SurfaceFinder::set_min_surface_amount(int min_surface_amount) {
+void SurfaceFinder::set_min_surface_amount(size_t min_surface_amount) {
   min_surface_amount_ = min_surface_amount;
 }
 
-void SurfaceFinder::set_max_surface_amount(int max_surface_amount) {
+void SurfaceFinder::set_max_surface_amount(size_t max_surface_amount) {
   max_surface_amount_ = max_surface_amount;
 }
 
 void SurfaceFinder::ExploreSurfaces(
-    std::vector<pcl::PointIndices::Ptr>* indices_internals,
-    std::vector<pcl::ModelCoefficients>* coeffs) {
+    std::vector<pcl::PointIndices::Ptr>* indices_vec,
+    std::vector<pcl::ModelCoefficients>* coeffs_vec) {
   bool debug = false;
 
   // Prepare indices and sort points by height
@@ -315,13 +314,20 @@ void SurfaceFinder::ExploreSurfaces(
             max_surface_amount_ - amount + 1, old_indices_ptr->indices.size());
       }
 
-      pcl::ModelCoefficients::Ptr new_coeff_ptr(new pcl::ModelCoefficients);
-      pcl::PointIndices::Ptr new_indices_ptr(new pcl::PointIndices);
-      FitSurface(old_indices_ptr, old_coeff_ptr, new_indices_ptr,
-                 new_coeff_ptr);
+      // Only perform refinement when the angle tolerance is greater than 0.0
+      if (angle_tolerance_degree_ > 0.0) {
+        pcl::ModelCoefficients::Ptr new_coeff_ptr(new pcl::ModelCoefficients);
+        pcl::PointIndices::Ptr new_indices_ptr(new pcl::PointIndices);
+        FitSurface(old_indices_ptr, old_coeff_ptr, new_indices_ptr,
+                   new_coeff_ptr);
 
-      indices_internals->push_back(new_indices_ptr);
-      coeffs->push_back(*new_coeff_ptr);
+        indices_vec->push_back(new_indices_ptr);
+        coeffs_vec->push_back(*new_coeff_ptr);
+      } else {
+        indices_vec->push_back(old_indices_ptr);
+        coeffs_vec->push_back(*old_coeff_ptr);
+      }
+
       amount--;
     }
   } else {

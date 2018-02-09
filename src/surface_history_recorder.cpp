@@ -13,17 +13,16 @@ typedef pcl::PointXYZRGB PointC;
 typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudC;
 
 namespace surface_perception {
-void SurfaceHistoryRecorder::Record(const size_t& id,
-                                    const PointCloudC::Ptr& cloud,
+void SurfaceHistoryRecorder::Record(size_t id, const PointCloudC::Ptr& cloud,
                                     const pcl::PointIndices::Ptr& indices,
-                                    const size_t& iteration) {
+                                    size_t iteration) {
   Update(0, id, cloud, indices, iteration);
 }
 
-void SurfaceHistoryRecorder::Update(const size_t& old_id, const size_t& new_id,
+void SurfaceHistoryRecorder::Update(size_t old_id, size_t new_id,
                                     const PointCloudC::Ptr& cloud,
                                     const pcl::PointIndices::Ptr& indices,
-                                    const size_t& iteration) {
+                                    size_t iteration) {
   if (new_id == 0) {
     ROS_INFO("Warning: Update(...) doesn't update id to 0.");
     return;
@@ -47,7 +46,7 @@ void SurfaceHistoryRecorder::Update(const size_t& old_id, const size_t& new_id,
 }
 
 void SurfaceHistoryRecorder::GetCloudHistory(
-    const size_t& id, const PointCloudC::Ptr output_cloud) const {
+    size_t id, const PointCloudC::Ptr output_cloud) const {
   std::map<size_t, PointCloudC::Ptr>::const_iterator iter =
       cloud_history_.find(id);
   if (iter != cloud_history_.end()) {
@@ -55,15 +54,14 @@ void SurfaceHistoryRecorder::GetCloudHistory(
   }
 }
 
-void SurfaceHistoryRecorder::GetClock(const size_t& id,
-                                      clock_t* clock_ptr) const {
+void SurfaceHistoryRecorder::GetClock(size_t id, clock_t* clock_ptr) const {
   std::map<size_t, clock_t>::const_iterator iter = time_history_.find(id);
   if (iter != time_history_.end()) {
     *clock_ptr = iter->second;
   }
 }
 
-void SurfaceHistoryRecorder::GetIteration(const size_t& id,
+void SurfaceHistoryRecorder::GetIteration(size_t id,
                                           size_t* iteration_ptr) const {
   std::map<size_t, size_t>::const_iterator iter = iteration_history_.find(id);
   if (iter != iteration_history_.end()) {
