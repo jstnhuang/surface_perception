@@ -63,8 +63,8 @@ void Segmentation::set_max_cluster_size(int max_cluster_size) {
 
 bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
   std::vector<Surface> surface_vec;
-  bool success = FindSurfaces(cloud_, indices_, horizontal_tolerance_degrees_,
-                              &surface_vec);
+  bool success = FindSurfaces(cloud_, indices_, margin_above_surface_,
+                              horizontal_tolerance_degrees_, &surface_vec);
   if (!success) {
     ROS_ERROR("Failed to find any surface.");
     return false;
@@ -82,6 +82,7 @@ bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
 }
 
 bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
+                  double margin_above_surface,
                   double horizontal_tolerance_degrees,
                   std::vector<Surface>* surfaces) {
   SurfaceFinder surfaceFinder;
@@ -90,9 +91,9 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   surfaceFinder.set_cloud(cloud);
   surfaceFinder.set_cloud_indices(indices);
   surfaceFinder.set_min_iteration(1000);
-  surfaceFinder.set_surface_point_threshold(3000);
-  surfaceFinder.set_angle_tolerance_degree(5.0);
-  surfaceFinder.set_max_point_distance(0.01);
+  surfaceFinder.set_surface_point_threshold(5000);
+  surfaceFinder.set_angle_tolerance_degree(horizontal_tolerance_degrees);
+  surfaceFinder.set_max_point_distance(margin_above_surface);
   surfaceFinder.ExploreSurfaces(0, 10, &indices_vec, &coeffs_vec);
 
   if (indices_vec.size() == 0 || coeffs_vec.size() == 0) {
@@ -107,6 +108,15 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
     surface.pose_stamped.header.frame_id = cloud->header.frame_id;
     FitBox(cloud, indices_vec[i], surface.coefficients,
            &surface.pose_stamped.pose, &surface.dimensions);
+
+    // Adjust the center of surface as well as the thickness of surface
+    double offset =
+        surface.coefficients->values[0] * surface.pose_stamped.pose.position.x +
+        surface.coefficients->values[1] * surface.pose_stamped.pose.position.y +
+        surface.coefficients->values[2] * surface.pose_stamped.pose.position.z +
+        surface.coefficients->values[3];
+    surface.pose_stamped.pose.position.z -= offset;
+    //surface.dimensions.z *= 2.0;
     surfaces->push_back(surface);
   }
 

@@ -45,7 +45,7 @@ class SurfaceFinder {
   /// \brief Set the input point cloud.
   ///
   /// \param[in] cloud 	The input cloud for surface detection. NaN values in
-  ///  the input cloud should be removed before being passed to this function.
+  ///   the input cloud should be removed before being passed to this function.
   void set_cloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud);
 
   /// \brief Set the indices of the input point cloud.
@@ -59,14 +59,14 @@ class SurfaceFinder {
   /// the angle set through this function is not used in surface detection.
   ///
   /// \param[in] angle_tolerance_degree The maximum angle difference between a
-  ///  surface candidate against a horizontal surface.
+  ///   surface candidate against a horizontal surface.
   void set_angle_tolerance_degree(const double& angle_tolerance_degree);
 
   /// \brief Set the maximum distance for a point to be considered part of
   /// surfaces.
   ///
   /// \param[in] max_point_distance The maximum distance between a point and
-  ///  a plane that represents the surface.
+  ///   a plane that represents the surface.
   void set_max_point_distance(const double& max_point_distance);
 
   /// \brief Set the minimum number of iterations for the algorithm to find
@@ -76,7 +76,7 @@ class SurfaceFinder {
   /// finding the specified minimum number of surfaces in a given scene.
   ///
   /// \param[in] min_iteration The minimum number of iteration required before
-  ///  the algorithm can stop search for surfaces.
+  ///   the algorithm can stop search for surfaces.
   void set_min_iteration(const int& min_iteration);
 
   /// \brief Set the minimum amount of points contained by a surface candidate.
@@ -87,7 +87,7 @@ class SurfaceFinder {
   /// considered a candidate.
   ///
   /// \param[in] surface_point_threshold The minimum number of points a surface
-  ///  candidate must have.
+  ///   candidate must have.
   void set_surface_point_threshold(const int& surface_point_threshold);
 
   /// \brief Find the horizontal surfaces in a point cloud scene
@@ -103,8 +103,7 @@ class SurfaceFinder {
   ///  3. point cloud history as history[i]
   ///
   /// \param[in] min_surface_amount The minimum number of surface must be found
-  /// before
-  ///  the algorithm stops.
+  ///   before the algorithm stops.
   /// \param[in] max_surface_amount The maximum number of surface in the output.
   /// \param[out] indices_internals The indices for of each output surface.
   /// \param[out] coeffs The coefficients of planes that represent each surface.

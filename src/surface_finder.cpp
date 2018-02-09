@@ -107,13 +107,20 @@ void filterIndices(const double& dist_limit,
 }
 
 /**
- * This function determines if given two planes are similar
+ * This function determines if given two planes are similar.
+ *
+ * If the two surfaces don't have points within the maximum point distance of
+ * the two surfaces, two surfaces are different. In other words, the two plane
+ * needs to be at least 2 * dist away in order to be consider different
+ * surfaces.
  */
 bool isSimilar(const double& dist, const pcl::ModelCoefficients& plane1,
                const pcl::ModelCoefficients& plane2) {
   double z1 = -1.0 * plane1.values[3] / plane1.values[2];
   double z2 = -1.0 * plane2.values[3] / plane2.values[2];
-  return fabs(z1 - z2) < 10 * dist;
+
+  // 
+  return fabs(z1 - z2) < 2.0 * dist;
 }
 
 /**
@@ -390,17 +397,6 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
       new_coeff_ptr->values[1] = b;
       new_coeff_ptr->values[2] = c;
       new_coeff_ptr->values[3] = d;
-    }
-
-    // Check if the old surface is refined into a different surface
-    if (!isSimilar(max_point_distance_, *old_coeff_ptr, *new_coeff_ptr)) {
-      ROS_ERROR(
-          "Incorrect refinement: Surface %fx+%fy+%fz+%f is mutated into "
-          "%fx+%fy+%fz+%f",
-          old_coeff_ptr->values[0], old_coeff_ptr->values[1],
-          old_coeff_ptr->values[2], old_coeff_ptr->values[3],
-          new_coeff_ptr->values[0], new_coeff_ptr->values[1],
-          new_coeff_ptr->values[2], new_coeff_ptr->values[3]);
     }
 
     iteration++;

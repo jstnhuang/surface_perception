@@ -128,6 +128,7 @@ class Segmentation {
 /// \param[in] cloud The point cloud to find a surface in, where positive z
 ///   points up.
 /// \param[in] indices The indices in the point cloud to find a surface in.
+/// \param[in] margin_above_surface The thickness of each surface.
 /// \param[in] horizontal_tolerance_degrees The tolerance, in degrees, for a
 ///   surface to be considered horizontal.
 /// \param[out] surfaces The vector of detected surfaces (may be changed even if
@@ -136,10 +137,11 @@ class Segmentation {
 /// \returns true if a surface was found, false otherwise.
 bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                   pcl::PointIndicesPtr indices,
+                  double margin_above_surface,
                   double horizontal_tolerance_degrees,
                   std::vector<Surface>* surfaces);
 
-/// \brief Segments the objects above each of a list of surfaces.
+/// \brief Extracts the part of the point cloud above a given surface.
 ///
 /// \param[in] cloud The point cloud to find a surface in, where positive z
 ///   points up.
@@ -164,7 +166,8 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                           double margin_above_surface, float height_limit,
                           pcl::PointIndices::Ptr above_surface_indices);
 
-/// \brief The algorithm that segments objects above a given surface.
+/// \brief The algorithm that segments the objects above each of a list of
+///   surfaces.
 ///
 /// \param[in] cloud The point cloud to find a surface in, where positive z
 ///   points up.
