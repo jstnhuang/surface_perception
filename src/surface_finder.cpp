@@ -149,26 +149,13 @@ SurfaceFinder::SurfaceFinder()
       sorted_indices_() {}
 
 void SurfaceFinder::set_cloud(const PointCloudC::Ptr& cloud) {
-  cloud_ = cloud;
-
-  // Fill up indices, if the indices is not specified yet
-  if (cloud_indices_->header.frame_id == "" &&
-      cloud_indices_->indices.size() == 0) {
-    for (size_t i = 0; i < cloud_->points.size(); i++) {
-      cloud_indices_->indices.push_back(i);
-    }
-    cloud_indices_->header.frame_id = cloud_->header.frame_id;
-  }
-
-  SortIndices();
+  cloud_ = cloud; 
 }
 
 void SurfaceFinder::set_cloud_indices(
     const pcl::PointIndices::Ptr cloud_indices) {
   cloud_indices_->header.frame_id = cloud_indices->header.frame_id;
   cloud_indices_->indices = cloud_indices->indices;
-
-  SortIndices();
 }
 
 void SurfaceFinder::set_angle_tolerance_degree(
@@ -194,6 +181,15 @@ void SurfaceFinder::ExploreSurfaces(
     std::vector<pcl::PointIndices::Ptr>* indices_internals,
     std::vector<pcl::ModelCoefficients>* coeffs) {
   bool debug = false;
+
+  // Prepare indices and sort points by height
+  if (cloud_indices_->indices.size() == 0) {
+    for (size_t i = 0; i < cloud_->points.size(); i++) {
+      cloud_indices_->indices.push_back(i);
+    }
+    cloud_indices_->header.frame_id = cloud_->header.frame_id;
+  }
+  SortIndices();
 
   // Algorithm overview:
   // 1. Get a point randomly from cloud_->points, which is a vector<PointCloudC>
