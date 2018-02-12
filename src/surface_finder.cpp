@@ -186,6 +186,12 @@ void SurfaceFinder::ExploreSurfaces(
     std::vector<pcl::ModelCoefficients>* coeffs_vec) {
   bool debug = false;
 
+  // Check if input cloud is set
+  if (cloud_->points.size() == 0) {
+    ROS_ERROR("The input point cloud is not set.");
+    return;
+  }
+
   // Prepare indices and sort points by height
   if (cloud_indices_->indices.size() == 0) {
     for (size_t i = 0; i < cloud_->points.size(); i++) {

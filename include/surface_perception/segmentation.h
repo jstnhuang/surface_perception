@@ -162,10 +162,10 @@ bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
 ///   first four coefficients.
 /// \param[in] margin_above_surface The margin to extend above the surface
 ///   plane, in meters.
-/// \param[in] height_limit The maximum height of each scene. The height is
+/// \param[in] height_limit The maximum height of each surface scene. The height
 ///  is defined as the distance from one plane to the plane above. If there's
-///  no plane above, then the height should be some value larger or equal
-///  to maximum point height.
+///  no plane above, then height_limit should be some value larger or equal to
+///  maximum point height in the input point cloud scene.
 /// \param[out] above_surface_indices The indices in the given point cloud
 ///   representing the points above the plane (and the margin above the plane).
 ///
