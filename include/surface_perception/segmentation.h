@@ -110,6 +110,20 @@ class Segmentation {
   ///   in a surface.
   void set_min_surface_size(int min_surface_size);
 
+  /// \brief Sets the minimum number of iterations required when exploring
+  ///   surfaces in the input point cloud.
+  ///
+  /// The surface exploration algorithm samples a height value for a horizontal
+  /// at each iteration, and min_surface_exploration_iteration indicates the
+  /// lower bound of number of iterations needed for the horizontal surface
+  /// sampling process.
+  ///
+  /// \param[in] min_surface_exploration_iteration The surface exploration
+  ///   algorithm needs to run at least the specified number of iteration during
+  ///   surface exploration.
+  void set_min_surface_exploration_iteration(
+      int min_surface_exploration_iteration);
+
   /// \brief Segments the scene.
   ///
   /// \param[out] surfaces The vector of SurfaceObjects to append to. This
@@ -131,6 +145,7 @@ class Segmentation {
   int min_cluster_size_;
   int max_cluster_size_;
   int min_surface_size_;
+  int min_surface_exploration_iteration_;
 };
 
 /// \brief Finds horizonal surfaces in the given point cloud.
@@ -143,6 +158,8 @@ class Segmentation {
 /// \param[in] horizontal_tolerance_degrees The tolerance, in degrees, for a
 ///   surface to be considered horizontal.
 /// \param[in] min_surface_size The required number of points for a surface.
+/// \param[in] min_surface_exploration_iteration The required number of
+///   iteration for the surface exploration algorithm.
 /// \param[out] surfaces The vector of detected surfaces (may be changed even if
 ///   no surface is found).
 ///
@@ -150,6 +167,7 @@ class Segmentation {
 bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                   pcl::PointIndicesPtr indices, double margin_above_surface,
                   double horizontal_tolerance_degrees, int min_surface_size,
+                  int min_surface_exploration_iteration,
                   std::vector<Surface>* surfaces);
 
 /// \brief Extracts the part of the point cloud above a given surface.

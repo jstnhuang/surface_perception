@@ -34,7 +34,8 @@ Segmentation::Segmentation()
       cluster_distance_(0.01),
       min_cluster_size_(10),
       max_cluster_size_(10000),
-      min_surface_size_(5000) {}
+      min_surface_size_(5000),
+      min_surface_exploration_iteration_(1000) {}
 
 void Segmentation::set_input_cloud(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud) {
@@ -63,11 +64,15 @@ void Segmentation::set_max_cluster_size(int max_cluster_size) {
 void Segmentation::set_min_surface_size(int min_surface_size) {
   min_surface_size_ = min_surface_size;
 }
+void Segmentation::set_min_surface_exploration_iteration(
+    int min_surface_exploration_iteration) {
+  min_surface_exploration_iteration_ = min_surface_exploration_iteration;
+}
 bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
   std::vector<Surface> surface_vec;
   bool success = FindSurfaces(cloud_, indices_, margin_above_surface_,
                               horizontal_tolerance_degrees_, min_surface_size_,
-                              &surface_vec);
+                              min_surface_exploration_iteration_, &surface_vec);
   if (!success) {
     ROS_ERROR("Failed to find any surface.");
     return false;
@@ -87,13 +92,14 @@ bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
 bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
                   double margin_above_surface,
                   double horizontal_tolerance_degrees, int min_surface_size,
+                  int min_surface_exploration_iteration,
                   std::vector<Surface>* surfaces) {
   SurfaceFinder surfaceFinder;
   std::vector<pcl::PointIndices::Ptr> indices_vec;
   std::vector<pcl::ModelCoefficients> coeffs_vec;
   surfaceFinder.set_cloud(cloud);
   surfaceFinder.set_cloud_indices(indices);
-  surfaceFinder.set_min_iteration(1000);
+  surfaceFinder.set_min_iteration(min_surface_exploration_iteration);
   surfaceFinder.set_surface_point_threshold(min_surface_size);
   surfaceFinder.set_angle_tolerance_degree(horizontal_tolerance_degrees);
   surfaceFinder.set_max_point_distance(margin_above_surface);
