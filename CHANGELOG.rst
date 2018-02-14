@@ -2,6 +2,11 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Multi-shelf detection
+* Contributors: Justin Huang, Yu-Tang Peng
+
 0.2.1 (2017-08-28)
 ------------------
 * Make new x-axis the one closer to the data's x-axis.
