@@ -5,6 +5,8 @@
   <description>Simple library for segmentation of tabletop and shelf surfaces</description>
 
   <maintainer email="jstn@cs.washington.edu">Justin Huang</maintainer>
+  <author email="pengy25@cs.washington.edu">Yu-Tang Peng</author>
+
   <license>BSD</license>
   <url type="website">http://wiki.ros.org/surface_perception</url>
 

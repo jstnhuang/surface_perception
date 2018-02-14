@@ -11,14 +11,14 @@
 #include "surface_perception/surface_objects.h"
 
 namespace surface_perception {
-/// \brief Segmentation is the algorithm for tabletop segmentation.
+/// \brief Segmentation is the algorithm for tabletop/shelf segmentation.
 ///
-/// This algorithm takes in a tabletop scene and segments it into a tabletop
-/// surface with some number of objects above it. The objects are segmented
-/// using a Euclidean clustering algorithm. The algorithm fits oriented bounding
-/// boxes around the surface and the objects. For each object, the z direction
-/// points "up," and the x direction points toward the shorter side of the
-/// oriented bounding box.
+/// This algorithm takes in a tabletop/shelf scene and segments it into
+/// surfaces with some number of objects above each surface.  The objects are
+/// segmented using a Euclidean clustering algorithm. For each surface, The
+/// algorithm fits oriented bounding boxes around the surface and the objects.
+/// For each object, the z direction points "up," and the x direction points
+/// toward the shorter side of the oriented bounding box.
 ///
 /// The algorithm assumes that the input scene is provided such that the
 /// positive z direction points "up."
@@ -33,13 +33,12 @@ namespace surface_perception {
 ///   seg.set_cluster_distance(0.01);
 ///   seg.set_min_cluster_size(10);
 ///   seg.set_max_cluster_size(10000);
+///   seg.set_min_surface_size(10000);
 ///
 ///   std::vector<SurfaceObjects> surface_objects;
 ///   bool success = seg.Segment(&surface_objects);
 /// \endcode
 ///
-/// In the future, we hope to extend this algorithm to automatically segment
-/// shelf scenes as well as tabletop scenes.
 class Segmentation {
  public:
   /// \brief Default constructor.
@@ -101,6 +100,30 @@ class Segmentation {
   ///   cluster for the cluster to be considered an object.
   void set_max_cluster_size(int max_cluster_size);
 
+  /// \brief Sets the minimum number of points a surface has to have.
+  ///
+  /// As the algorithm only considers surfaces with more than required number
+  /// of points as valid surfaces, the lower bound of surface size is used in
+  /// order to ignore invalid surfaces
+  ///
+  /// \param[in] min_surface_size The minimum requirement on number of points
+  ///   in a surface.
+  void set_min_surface_size(int min_surface_size);
+
+  /// \brief Sets the minimum number of iterations required when exploring
+  ///   surfaces in the input point cloud.
+  ///
+  /// The surface exploration algorithm samples a height value for a horizontal
+  /// at each iteration, and min_surface_exploration_iteration indicates the
+  /// lower bound of number of iterations needed for the horizontal surface
+  /// sampling process.
+  ///
+  /// \param[in] min_surface_exploration_iteration The surface exploration
+  ///   algorithm needs to run at least the specified number of iteration during
+  ///   surface exploration.
+  void set_min_surface_exploration_iteration(
+      int min_surface_exploration_iteration);
+
   /// \brief Segments the scene.
   ///
   /// \param[out] surfaces The vector of SurfaceObjects to append to. This
@@ -121,22 +144,31 @@ class Segmentation {
   double cluster_distance_;
   int min_cluster_size_;
   int max_cluster_size_;
+  int min_surface_size_;
+  int min_surface_exploration_iteration_;
 };
 
-/// \brief Finds a surface in the given point cloud.
+/// \brief Finds horizonal surfaces in the given point cloud.
 ///
 /// \param[in] cloud The point cloud to find a surface in, where positive z
 ///   points up.
 /// \param[in] indices The indices in the point cloud to find a surface in.
+/// \param[in] margin_above_surface The maximum distance between a plane and a
+///   point, in order to be considered as part of a surface.
 /// \param[in] horizontal_tolerance_degrees The tolerance, in degrees, for a
 ///   surface to be considered horizontal.
-/// \param[out] surface The detected surface (may be changed even if no surface
-///   is found).
+/// \param[in] min_surface_size The required number of points for a surface.
+/// \param[in] min_surface_exploration_iteration The required number of
+///   iteration for the surface exploration algorithm.
+/// \param[out] surfaces The vector of detected surfaces (may be changed even if
+///   no surface is found).
 ///
 /// \returns true if a surface was found, false otherwise.
-bool FindSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-                 pcl::PointIndicesPtr indices,
-                 double horizontal_tolerance_degrees, Surface* surface);
+bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+                  pcl::PointIndicesPtr indices, double margin_above_surface,
+                  double horizontal_tolerance_degrees, int min_surface_size,
+                  int min_surface_exploration_iteration,
+                  std::vector<Surface>* surfaces);
 
 /// \brief Extracts the part of the point cloud above a given surface.
 ///
@@ -148,6 +180,10 @@ bool FindSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
 ///   first four coefficients.
 /// \param[in] margin_above_surface The margin to extend above the surface
 ///   plane, in meters.
+/// \param[in] height_limit The maximum height of each surface scene. The height
+///  is defined as the distance from one plane to the plane above. If there's
+///  no plane above, then height_limit should be some value larger or equal to
+///  maximum point height in the input point cloud scene.
 /// \param[out] above_surface_indices The indices in the given point cloud
 ///   representing the points above the plane (and the margin above the plane).
 ///
@@ -156,15 +192,16 @@ bool FindSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
 bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                           pcl::PointIndicesPtr indices,
                           const pcl::ModelCoefficients& coefficients,
-                          double margin_above_surface,
+                          double margin_above_surface, float height_limit,
                           pcl::PointIndices::Ptr above_surface_indices);
 
-/// \brief The algorithm that segments objects above a given surface.
+/// \brief The algorithm that segments the objects above each of a list of
+///   surfaces.
 ///
 /// \param[in] cloud The point cloud to find a surface in, where positive z
 ///   points up.
 /// \param[in] indices The indices in the point cloud to segment from.
-/// \param[in] surface The surface to segment objects from.
+/// \param[in] surface_vec The vector of surfaces to segment objects from.
 /// \param[in] margin_above_surface The margin to extend above the surface
 ///   plane, in meters.
 /// \param[in] cluster_distance The distance between points (in meters) for
@@ -173,15 +210,16 @@ bool GetSceneAboveSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
 ///   cluster for that cluster to be considered an object.
 /// \param[in] max_cluster_size The maximum number of points that can be in a
 ///   cluster for that cluster to be considered an object.
-/// \param[out] surface_objects The surface and the objects above it that were
-///   found.
+/// \param[out] surfaces_objects_vec The vector of surfaces and the objects
+///   above each surface that were found.
 ///
 /// \returns true if the segmentation was successful, false otherwise.
-bool FindObjectsOnSurface(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-                          pcl::PointIndicesPtr indices, const Surface& surface,
-                          double margin_above_surface, double cluster_distance,
-                          int min_cluster_size, int max_cluster_size,
-                          SurfaceObjects* surface_objects);
+bool FindObjectsOnSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+                           pcl::PointIndicesPtr indices,
+                           const std::vector<Surface>& surface_vec,
+                           double margin_above_surface, double cluster_distance,
+                           int min_cluster_size, int max_cluster_size,
+                           std::vector<SurfaceObjects>* surfaces_objects_vec);
 }  // namespace surface_perception
 
 #endif  // _SURFACE_PERCEPTION_SEGMENTATION_H_
