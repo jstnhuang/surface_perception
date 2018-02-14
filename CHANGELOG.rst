@@ -2,8 +2,8 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2018-02-13)
+------------------
 * Multi-shelf detection
 * Contributors: Justin Huang, Yu-Tang Peng
 
