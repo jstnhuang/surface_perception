@@ -164,20 +164,42 @@ void SurfaceFinder::set_max_point_distance(double max_point_distance) {
   max_point_distance_ = max_point_distance;
 }
 
-void SurfaceFinder::set_min_iteration(size_t min_iteration) {
+void SurfaceFinder::set_min_iteration(int min_iteration) {
+  if (min_iteration < 0) {
+    ROS_ERROR(
+        "set_min_iteration can not have a negative value as the parameter.");
+    return;
+  }
   min_iteration_ = min_iteration;
 }
 
-void SurfaceFinder::set_surface_point_threshold(
-    size_t surface_point_threshold) {
+void SurfaceFinder::set_surface_point_threshold(int surface_point_threshold) {
+  if (surface_point_threshold < 0) {
+    ROS_ERROR(
+        "set_surface_point_threshold can not have a negative value as the "
+        "parameter.");
+    return;
+  }
   surface_point_threshold_ = surface_point_threshold;
 }
 
-void SurfaceFinder::set_min_surface_amount(size_t min_surface_amount) {
+void SurfaceFinder::set_min_surface_amount(int min_surface_amount) {
+  if (min_surface_amount < 0) {
+    ROS_ERROR(
+        "set_min_surface_amount can not have a negative value as the "
+        "parameter.");
+    return;
+  }
   min_surface_amount_ = min_surface_amount;
 }
 
-void SurfaceFinder::set_max_surface_amount(size_t max_surface_amount) {
+void SurfaceFinder::set_max_surface_amount(int max_surface_amount) {
+  if (max_surface_amount < 0) {
+    ROS_ERROR(
+        "set_max_surface_amount can not have a negative value as the "
+        "parameter.");
+    return;
+  }
   max_surface_amount_ = max_surface_amount;
 }
 

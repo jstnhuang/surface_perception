@@ -77,7 +77,7 @@ class SurfaceFinder {
   ///
   /// \param[in] min_iteration The minimum number of iteration required before
   ///   the algorithm can stop search for surfaces.
-  void set_min_iteration(size_t min_iteration);
+  void set_min_iteration(int min_iteration);
 
   /// \brief Set the minimum amount of points contained by a surface candidate.
   ///
@@ -88,21 +88,21 @@ class SurfaceFinder {
   ///
   /// \param[in] surface_point_threshold The minimum number of points a surface
   ///   candidate must have.
-  void set_surface_point_threshold(size_t surface_point_threshold);
+  void set_surface_point_threshold(int surface_point_threshold);
 
   /// \brief Set the minimum number of surfaces in the output of
   ///   ExploreSurfaces.
   ///
   /// \param[in] min_surface_amount The specified number of surfaces that must
   ///   be in the output of ExploreSurfaces.
-  void set_min_surface_amount(size_t min_surface_amount);
+  void set_min_surface_amount(int min_surface_amount);
 
   /// \brief Set the maximum number of the surfaces in the output of
   ///   ExploreSurfaces.
   ///
   /// \param[in] max_surface_amount The upper bound of the surface amount that
   ///   can not be exceeded in the output of ExploreSurfaces.
-  void set_max_surface_amount(size_t max_surface_amount);
+  void set_max_surface_amount(int max_surface_amount);
 
   /// \brief Find the horizontal surfaces in a point cloud scene
   ///
