@@ -363,7 +363,7 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
                                const pcl::ModelCoefficients::Ptr old_coeff_ptr,
                                pcl::PointIndices::Ptr new_indices_ptr,
                                pcl::ModelCoefficients::Ptr new_coeff_ptr) {
-  size_t iteration_each = min_iteration_ / 10;  // Use 10% of minimum iterations
+  size_t iteration_each = std::max(min_iteration_ / 10, (size_t)10);  // Use 10% of minimum iterations
   size_t iteration = 0;
 
   size_t max_num_points = old_indices_ptr->indices.size();
