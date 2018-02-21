@@ -10,6 +10,8 @@
 #include "surface_perception/surface_objects.h"
 #include "surface_perception/typedefs.h"
 #include "surface_perception/visualization.h"
+#include "tf/transform_listener.h"
+#include "tf_conversions/tf_eigen.h"
 
 using surface_perception::SurfaceObjects;
 using surface_perception::SurfaceViz;
@@ -22,14 +24,28 @@ class Demo {
  private:
   SurfaceViz viz_;
   ros::Publisher input_pub_;
+  tf::TransformListener tf_listener_;
 };
 
 Demo::Demo(const SurfaceViz& viz, const ros::Publisher input_pub)
-    : viz_(viz), input_pub_(input_pub) {}
+    : viz_(viz), input_pub_(input_pub), tf_listener_() {}
 
 void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
+  PointCloudC::Ptr pcl_cloud_raw(new PointCloudC);
+  pcl::fromROSMsg(*cloud, *pcl_cloud_raw);
   PointCloudC::Ptr pcl_cloud(new PointCloudC);
-  pcl::fromROSMsg(*cloud, *pcl_cloud);
+
+  if (cloud->header.frame_id != "base_link") {
+    tf_listener_.waitForTransform("base_link", cloud->header.frame_id,
+                                  ros::Time(0), ros::Duration(1));
+    tf::StampedTransform transform;
+    tf_listener_.lookupTransform("base_link", cloud->header.frame_id,
+                                 ros::Time(0), transform);
+    Eigen::Affine3d affine;
+    tf::transformTFToEigen(transform, affine);
+    pcl::transformPointCloud(*pcl_cloud_raw, *pcl_cloud, affine);
+    pcl_cloud->header.frame_id = "base_link";
+  }
 
   std::vector<int> indices;
   pcl::removeNaNFromPointCloud(*pcl_cloud, *pcl_cloud, indices);
