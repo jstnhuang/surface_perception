@@ -45,6 +45,8 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
     tf::transformTFToEigen(transform, affine);
     pcl::transformPointCloud(*pcl_cloud_raw, *pcl_cloud, affine);
     pcl_cloud->header.frame_id = "base_link";
+  } else {
+    pcl_cloud = pcl_cloud_raw;
   }
 
   std::vector<int> indices;

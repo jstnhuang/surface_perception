@@ -10,11 +10,96 @@
 #include "pcl/point_cloud.h"
 #include "pcl/point_types.h"
 #include "pcl/surface/convex_hull.h"
+#include "ros/ros.h"
 
 #include "surface_perception/typedefs.h"
+#include "pcl/features/normal_3d.h"
+
+namespace {
+bool checkConvexHull(const pcl::ModelCoefficients::Ptr& model, const PointCloudC::Ptr& flat_projected) {
+    Eigen::Vector3d x_axis_ (1.0, 0.0, 0.0);
+    Eigen::Vector3d y_axis_ (0.0, 1.0, 0.0);
+    Eigen::Vector3d z_axis_ (0.0, 0.0, 1.0);
+
+    std::vector<int> *indices_ = new std::vector<int>();
+    for (size_t i = 0; i < flat_projected->points.size(); i++) {
+      indices_->push_back(i);
+    }
+    double projection_angle_thresh_ = cos (0.174532925);
+    int dimension = 2;
+    bool xy_proj_safe = true;
+    bool yz_proj_safe = true;
+    bool xz_proj_safe = true;
+
+    // Check the input's normal to see which projection to use
+    PointC p0 = flat_projected->points[(*indices_)[0]];
+    PointC p1 = flat_projected->points[(*indices_)[indices_->size () - 1]];
+    PointC p2 = flat_projected->points[(*indices_)[indices_->size () / 2]];
+
+    Eigen::Array4f dy1dy2 = (p1.getArray4fMap () - p0.getArray4fMap ()) / (p2.getArray4fMap () - p0.getArray4fMap ());
+    while (!( (dy1dy2[0] != dy1dy2[1]) || (dy1dy2[2] != dy1dy2[1]) ) )
+    {
+      p0 = flat_projected->points[(*indices_)[rand () % indices_->size ()]];
+      p1 = flat_projected->points[(*indices_)[rand () % indices_->size ()]];
+      p2 = flat_projected->points[(*indices_)[rand () % indices_->size ()]];
+      dy1dy2 = (p1.getArray4fMap () - p0.getArray4fMap ()) / (p2.getArray4fMap () - p0.getArray4fMap ());
+    }
+     
+    pcl::PointCloud<PointC> normal_calc_cloud;
+    normal_calc_cloud.points.resize (3);
+    normal_calc_cloud.points[0] = p0;
+    normal_calc_cloud.points[1] = p1;
+    normal_calc_cloud.points[2] = p2;
+      
+    Eigen::Vector4d normal_calc_centroid;
+    Eigen::Matrix3d normal_calc_covariance;
+    pcl::computeMeanAndCovarianceMatrix (normal_calc_cloud, normal_calc_covariance, normal_calc_centroid);
+    // Need to set -1 here. See eigen33 for explanations.
+    Eigen::Vector3d::Scalar eigen_value;
+    Eigen::Vector3d plane_params;
+    pcl::eigen33 (normal_calc_covariance, eigen_value, plane_params);
+    float theta_x = fabsf (static_cast<float> (plane_params.dot (x_axis_)));
+    float theta_y = fabsf (static_cast<float> (plane_params.dot (y_axis_)));
+    float theta_z = fabsf (static_cast<float> (plane_params.dot (z_axis_)));
+
+    std::vector<PointC> points;
+    points.push_back(p0);
+    points.push_back(p1);
+    points.push_back(p2);
+ 
+    // Check for degenerate cases of each projection
+    // We must avoid projections in which the plane projects as a line
+    if (theta_z > projection_angle_thresh_)
+    {
+      xz_proj_safe = false;
+      yz_proj_safe = false;
+    }
+    if (theta_x > projection_angle_thresh_)
+    {
+      xz_proj_safe = false;
+      xy_proj_safe = false;
+    }
+    if (theta_y > projection_angle_thresh_)
+    {
+      xy_proj_safe = false;
+      yz_proj_safe = false;
+    }
+
+    if (!xy_proj_safe) {
+      ROS_INFO("Worning: could not use the following three points to calculate convex hull!");
+      ROS_INFO("P0 (%f, %f, %f)", p0.x, p0.y, p0.z);
+      ROS_INFO("P1 (%f, %f, %f)", p1.x, p1.y, p1.z);
+      ROS_INFO("P2 (%f, %f, %f)", p2.x, p2.y, p2.z);
+
+      return false;
+    }
+
+    return true;
+}
+}
 
 namespace surface_perception {
-void FitBox(const PointCloudC::Ptr& input,
+bool FitBox(const PointCloudC::Ptr& input,
             const pcl::PointIndices::Ptr& indices,
             const pcl::ModelCoefficients::Ptr& model, geometry_msgs::Pose* pose,
             geometry_msgs::Vector3* dimensions) {
@@ -67,9 +152,14 @@ void FitBox(const PointCloudC::Ptr& input,
   // Find the convex hull
   pcl::PointCloud<pcl::PointXYZRGB> hull;
   pcl::ConvexHull<pcl::PointXYZRGB> convex_hull;
-  convex_hull.setInputCloud(flat_projected);
-  convex_hull.setDimension(2);
-  convex_hull.reconstruct(hull);
+
+  if (checkConvexHull(model, flat_projected)) {
+    convex_hull.setInputCloud(flat_projected);
+    convex_hull.setDimension(2);
+    convex_hull.reconstruct(hull);
+  } else {
+    return false;
+  }
 
   // Try fitting a rectangle
   for (size_t i = 0; i < hull.size() - 1; ++i) {
@@ -162,5 +252,7 @@ void FitBox(const PointCloudC::Ptr& input,
       min_volume = area * height;
     }
   }
+
+  return true;
 }
 }  // namespace surface_perception

@@ -229,13 +229,10 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
       Object object;
       object.cloud = cloud;
       object.indices.reset(new pcl::PointIndices(object_indices[j]));
-
-      // Only output the object when the object contains more than 4 points
-      if (object.indices->indices.size() >= min_cluster_size) {
-        ROS_INFO("Object has %ld points", object.indices->indices.size());
-        object.pose_stamped.header.frame_id = cloud->header.frame_id;
-        FitBox(cloud, object.indices, surfaces[i].coefficients,
-               &object.pose_stamped.pose, &object.dimensions);
+      object.pose_stamped.header.frame_id = cloud->header.frame_id;
+      
+      if (FitBox(cloud, object.indices, surfaces[i].coefficients,
+               &object.pose_stamped.pose, &object.dimensions)) {
         surface_objects.objects.push_back(object);
       }
     }
