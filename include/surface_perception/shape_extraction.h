@@ -26,6 +26,9 @@ namespace surface_perception {
 ///   shorter side of the box.
 /// \param[out] dimensions The dimensions of the oriented bounding box. x, y,
 ///   and z correspond to the directions of the pose.
+///
+/// \returns reports true when a bounding box can be constructed for the object,
+///   or false if the construction fails.
 bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
             const pcl::PointIndicesPtr& indices,
             const pcl::ModelCoefficients::Ptr& model, geometry_msgs::Pose* pose,

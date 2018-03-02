@@ -1,3 +1,4 @@
+#include <string>
 #include <vector>
 
 #include "Eigen/Eigen"
@@ -18,33 +19,39 @@ using surface_perception::SurfaceViz;
 
 class Demo {
  public:
-  Demo(const SurfaceViz& viz, const ros::Publisher input_pub);
+  Demo(const SurfaceViz& viz, const std::string& target_frame,
+       const ros::Publisher& input_pub);
   void Callback(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
  private:
   SurfaceViz viz_;
   ros::Publisher input_pub_;
+  std::string target_frame_;
   tf::TransformListener tf_listener_;
 };
 
-Demo::Demo(const SurfaceViz& viz, const ros::Publisher input_pub)
-    : viz_(viz), input_pub_(input_pub), tf_listener_() {}
+Demo::Demo(const SurfaceViz& viz, const std::string& target_frame,
+           const ros::Publisher& input_pub)
+    : viz_(viz),
+      target_frame_(target_frame),
+      input_pub_(input_pub),
+      tf_listener_() {}
 
 void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   PointCloudC::Ptr pcl_cloud_raw(new PointCloudC);
   pcl::fromROSMsg(*cloud, *pcl_cloud_raw);
   PointCloudC::Ptr pcl_cloud(new PointCloudC);
 
-  if (cloud->header.frame_id != "base_link") {
-    tf_listener_.waitForTransform("base_link", cloud->header.frame_id,
+  if (cloud->header.frame_id != target_frame_) {
+    tf_listener_.waitForTransform(target_frame_, cloud->header.frame_id,
                                   ros::Time(0), ros::Duration(1));
     tf::StampedTransform transform;
-    tf_listener_.lookupTransform("base_link", cloud->header.frame_id,
+    tf_listener_.lookupTransform(target_frame_, cloud->header.frame_id,
                                  ros::Time(0), transform);
     Eigen::Affine3d affine;
     tf::transformTFToEigen(transform, affine);
     pcl::transformPointCloud(*pcl_cloud_raw, *pcl_cloud, affine);
-    pcl_cloud->header.frame_id = "base_link";
+    pcl_cloud->header.frame_id = target_frame_;
   } else {
     pcl_cloud = pcl_cloud_raw;
   }
@@ -135,8 +142,13 @@ int main(int argc, char** argv) {
   ros::Publisher cropped_input_pub = nh.advertise<sensor_msgs::PointCloud2>(
       "demo_cropped_input_cloud", 1, true);
 
+  std::string target_frame("base_link");
+  if (argc > 1) {
+    target_frame = argv[1];
+  }
+
   SurfaceViz viz(marker_pub);
-  Demo demo(viz, cropped_input_pub);
+  Demo demo(viz, target_frame, cropped_input_pub);
   ros::Subscriber pc_sub = nh.subscribe<sensor_msgs::PointCloud2>(
       "cloud_in", 1, &Demo::Callback, &demo);
   ros::spin();
