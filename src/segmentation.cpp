@@ -199,19 +199,15 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
         cloud, indices, *surfaces[i].coefficients, margin_above_surface,
         height_limit, above_surface_indices);
     if (!success) {
-      ROS_ERROR(
-          "Error: extraction of indices above a horizontal surface failed");
-      for (size_t j = 0; j < surfaces.size(); j++) {
-        ROS_ERROR("Surface %ld at (%f, %f, %f) with dimesions (%f, %f, %f)", j,
-                  surfaces[j].pose_stamped.pose.position.x,
-                  surfaces[j].pose_stamped.pose.position.y,
-                  surfaces[j].pose_stamped.pose.position.z,
-                  surfaces[j].dimensions.x, surfaces[j].dimensions.y,
-                  surfaces[j].dimensions.z);
-      }
-      return false;
+      ROS_WARN(
+          "Warning: extraction of indices above a horizontal surface failed");
+      ROS_WARN("Surface %ld at (%f, %f, %f) with dimesions (%f, %f, %f)", i,
+               surfaces[i].pose_stamped.pose.position.x,
+               surfaces[i].pose_stamped.pose.position.y,
+               surfaces[i].pose_stamped.pose.position.z,
+               surfaces[i].dimensions.x, surfaces[i].dimensions.y,
+               surfaces[i].dimensions.z);
     }
-
     above_surface_indices_vec.push_back(above_surface_indices);
   }
 
@@ -241,6 +237,7 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
     surfaces_objects_vec->push_back(surface_objects);
   }
 
-  return true;
+  // Check if the function processes the correct number of surfaces
+  return surfaces_objects_vec->size() == surface_vec.size();
 }
 }  // namespace surface_perception
