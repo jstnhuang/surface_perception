@@ -115,17 +115,19 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
     surface.coefficients.reset(new pcl::ModelCoefficients);
     surface.coefficients->values = coeffs_vec[i].values;
     surface.pose_stamped.header.frame_id = cloud->header.frame_id;
-    FitBox(cloud, indices_vec[i], surface.coefficients,
-           &surface.pose_stamped.pose, &surface.dimensions);
-
-    // Adjust the center of surface
-    double offset =
-        surface.coefficients->values[0] * surface.pose_stamped.pose.position.x +
-        surface.coefficients->values[1] * surface.pose_stamped.pose.position.y +
-        surface.coefficients->values[2] * surface.pose_stamped.pose.position.z +
-        surface.coefficients->values[3];
-    surface.pose_stamped.pose.position.z -= offset;
-    surfaces->push_back(surface);
+    if (FitBox(cloud, indices_vec[i], surface.coefficients,
+               &surface.pose_stamped.pose, &surface.dimensions)) {
+      // Adjust the center of surface
+      double offset = surface.coefficients->values[0] *
+                          surface.pose_stamped.pose.position.x +
+                      surface.coefficients->values[1] *
+                          surface.pose_stamped.pose.position.y +
+                      surface.coefficients->values[2] *
+                          surface.pose_stamped.pose.position.z +
+                      surface.coefficients->values[3];
+      surface.pose_stamped.pose.position.z -= offset;
+      surfaces->push_back(surface);
+    }
   }
 
   return true;
@@ -230,9 +232,11 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
       object.cloud = cloud;
       object.indices.reset(new pcl::PointIndices(object_indices[j]));
       object.pose_stamped.header.frame_id = cloud->header.frame_id;
-      FitBox(cloud, object.indices, surfaces[i].coefficients,
-             &object.pose_stamped.pose, &object.dimensions);
-      surface_objects.objects.push_back(object);
+
+      if (FitBox(cloud, object.indices, surfaces[i].coefficients,
+                 &object.pose_stamped.pose, &object.dimensions)) {
+        surface_objects.objects.push_back(object);
+      }
     }
     surfaces_objects_vec->push_back(surface_objects);
   }
