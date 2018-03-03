@@ -33,8 +33,8 @@ class Demo {
 Demo::Demo(const SurfaceViz& viz, const std::string& target_frame,
            const ros::Publisher& input_pub)
     : viz_(viz),
-      target_frame_(target_frame),
       input_pub_(input_pub),
+      target_frame_(target_frame),
       tf_listener_() {}
 
 void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
