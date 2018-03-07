@@ -2,6 +2,13 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Allowed surfaces with no object on them.
+* Fixed occasional crashes due to convex hull computation.
+* Added optional point cloud frame argument in demo to support target frame other than base_link.
+* Contributors: Justin Huang, Yu-Tang Peng
+
 1.0.0 (2018-02-13)
 ------------------
 * Multi-shelf detection
