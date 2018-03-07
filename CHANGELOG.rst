@@ -2,8 +2,8 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2018-03-06)
+------------------
 * Allowed surfaces with no object on them.
 * Fixed occasional crashes due to convex hull computation.
 * Added optional point cloud frame argument in demo to support target frame other than base_link.

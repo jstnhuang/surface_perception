@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>surface_perception</name>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <description>Simple library for segmentation of tabletop and shelf surfaces</description>
 
   <maintainer email="jstn@cs.washington.edu">Justin Huang</maintainer>
