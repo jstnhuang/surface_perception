@@ -2,22 +2,43 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b surface_perception is a simple tabletop perception pipeline.
+\b surface_perception is a simple tabletop/shelf perception pipeline.
 
 surface_perception::Segmentation is the main API.
 It takes in a point cloud, where the positive "z" direction points up.
-It also assumes that the point cloud has been cropped down to a tabletop scene.  
+It also assumes that the point cloud has been cropped down to a tabletop/shelf scene.  
 
 Example:
 \code
 surface_perception::Segmentation seg;
 seg.set_input_cloud(pcl_cloud);
+
+// (Optional) Set the particular indices to be used in the input point cloud,
+// for the segmentation operation. If the indices is not set, the entire
+// input cloud will be used.
 seg.set_indices(point_indices);
+
+// (Optional, default 10) Set the maximum difference between the normal
+// vector of surfaces and the z-axis.
 seg.set_horizontal_tolerance_degrees(10);
+
+// (Optional, default 0.005) Set the maximum distance between the surface
+// inliers and the plane that represents the surface.
 seg.set_margin_above_surface(0.01);
+
+// (Optional, default 0.01) Set the required distance between each cluster
+// corresponding to each object, during the object extraction.
 seg.set_cluster_distance(0.01);
+
+// (Optional, default 10) Set the minimum size of object clusters.
 seg.set_min_cluster_size(10);
+
+// (Optional, default 10000) Set the maximum size of object clusters.
 seg.set_max_cluster_size(10000);
+
+// (Optional, default 5000) Set the minimum number of inliers contained by a
+// surface.
+seg.set_min_surface_size(5000);
 
 std::vector<SurfaceObjects> surface_objects;
 bool success = seg.Segment(&surface_objects);
