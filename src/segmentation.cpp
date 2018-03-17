@@ -23,6 +23,19 @@ bool SurfaceComparator(const surface_perception::Surface& s1,
   return s1.pose_stamped.pose.position.z < s2.pose_stamped.pose.position.z;
 }
 
+bool IsPointingTowardsOrigin(const surface_perception::Surface& surface) {
+  // Find the vector pointing to origin
+  Eigen::Matrix3f origin;
+  origin << 1.0, 0.0, 0.0,
+	 0.0, 1.0, 0.0,
+	 0.0, 0.0, 0.1;
+
+  Eigen::Quaternionf surface_quaternion(surface.pose_stamped.pose.orientation.x,
+		  surface.pose_stamped.pose.orientation.y,
+		  surface.pose_stamped.pose.orientation.z,
+		  surface.pose_stamped.pose.orientation.w);
+  Eigen::Matrix3f surface_orientation = surface_quaternion.toRotationMatrix();
+}
 }  // Anonymous namespace
 
 namespace surface_perception {
