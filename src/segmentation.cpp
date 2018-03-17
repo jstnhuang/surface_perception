@@ -1,5 +1,6 @@
 #include "surface_perception/segmentation.h"
 
+#include <sstream>
 #include <vector>
 
 #include "Eigen/Eigen"
@@ -23,18 +24,28 @@ bool SurfaceComparator(const surface_perception::Surface& s1,
   return s1.pose_stamped.pose.position.z < s2.pose_stamped.pose.position.z;
 }
 
-bool IsPointingTowardsOrigin(const surface_perception::Surface& surface) {
+template <class T>
+bool IsPointingTowardsOrigin(const T& box) {
   // Find the vector pointing to origin
   Eigen::Matrix3f origin;
   origin << 1.0, 0.0, 0.0,
 	 0.0, 1.0, 0.0,
 	 0.0, 0.0, 0.1;
 
-  Eigen::Quaternionf surface_quaternion(surface.pose_stamped.pose.orientation.x,
-		  surface.pose_stamped.pose.orientation.y,
-		  surface.pose_stamped.pose.orientation.z,
-		  surface.pose_stamped.pose.orientation.w);
-  Eigen::Matrix3f surface_orientation = surface_quaternion.toRotationMatrix();
+  Eigen::Quaternionf box_quaternion(box.pose_stamped.pose.orientation.x,
+		  box.pose_stamped.pose.orientation.y,
+		  box.pose_stamped.pose.orientation.z,
+		  box.pose_stamped.pose.orientation.w);
+  Eigen::Matrix3f box_orientation = box_quaternion.toRotationMatrix();
+
+  std::stringstream ss;
+  ss << box_orientation;
+  ROS_INFO("The box has rotation matrix of %s", ss.str().c_str());
+
+  if (box_orientation(0,0) > 0 || box_orientation(1,1) > 0) {
+    return false;
+  }
+  return true;
 }
 }  // Anonymous namespace
 
@@ -141,6 +152,11 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
       surface.pose_stamped.pose.position.z -= offset;
       surfaces->push_back(surface);
     }
+
+    if (!IsPointingTowardsOrigin(surface)) {
+      ROS_ERROR("Surface orientation incorrect!");
+      system("exit");
+    }
   }
 
   return true;
@@ -245,6 +261,10 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
       if (FitBox(cloud, object.indices, surfaces[i].coefficients,
                  &object.pose_stamped.pose, &object.dimensions)) {
         surface_objects.objects.push_back(object);
+      }
+      if (!IsPointingTowardsOrigin(object)) {
+        ROS_ERROR("object orientation incorrect!");
+        system("exit");
       }
     }
     surfaces_objects_vec->push_back(surface_objects);
