@@ -27,10 +27,10 @@ bool SurfaceComparator(const surface_perception::Surface& s1,
 template <class T>
 bool IsPointingTowardsOrigin(const T& box) {
   // Find the vector pointing to origin
-  Eigen::Matrix3f origin;
-  origin << 1.0, 0.0, 0.0,
-	 0.0, 1.0, 0.0,
-	 0.0, 0.0, 0.1;
+  Eigen::Matrix3f toOrigin;
+  toOrigin << -1.0, 0.0, 0.0,
+	   0.0, -1.0, 0.0,
+	   0.0, 0.0, 1.0;
 
   Eigen::Quaternionf box_quaternion(box.pose_stamped.pose.orientation.x,
 		  box.pose_stamped.pose.orientation.y,
@@ -38,11 +38,21 @@ bool IsPointingTowardsOrigin(const T& box) {
 		  box.pose_stamped.pose.orientation.w);
   Eigen::Matrix3f box_orientation = box_quaternion.toRotationMatrix();
 
-  std::stringstream ss;
-  ss << box_orientation;
-  ROS_INFO("The box has rotation matrix of %s", ss.str().c_str());
+  Eigen::Matrix3f diff = (box_orientation - toOrigin).array().abs().matrix();
+  
 
-  if (box_orientation(0,0) > 0 || box_orientation(1,1) > 0) {
+
+  if (diff.sum() > 1.0) {
+    std::stringstream ss;
+    ss << box_orientation;
+    ROS_INFO("The box has rotation matrix of");
+    ROS_INFO("%s" , ss.str().c_str());
+    ss.str("");
+    ss << diff;
+    ROS_INFO("Diff is");
+    ROS_INFO("%s" , ss.str().c_str());
+    ss.str("");
+    ROS_INFO("Sum of diff is %f", diff.sum());
     return false;
   }
   return true;
