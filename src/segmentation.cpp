@@ -42,7 +42,7 @@ bool IsPointingTowardsOrigin(const T& box) {
   
 
 
-  if (diff.sum() > 1.0) {
+  if (diff.sum() > 2.0) {
     std::stringstream ss;
     ss << box_orientation;
     ROS_INFO("The box has rotation matrix of");
@@ -269,12 +269,12 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
       object.pose_stamped.header.frame_id = cloud->header.frame_id;
 
       if (FitBox(cloud, object.indices, surfaces[i].coefficients,
-                 &object.pose_stamped.pose, &object.dimensions)) {
+                 &object.pose_stamped.pose, &object.dimensions)
+		      && IsPointingTowardsOrigin(object)) {
         surface_objects.objects.push_back(object);
       }
       if (!IsPointingTowardsOrigin(object)) {
         ROS_ERROR("object orientation incorrect!");
-        system("exit");
       }
     }
     surfaces_objects_vec->push_back(surface_objects);
