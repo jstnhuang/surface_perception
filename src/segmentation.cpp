@@ -275,6 +275,7 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
       }
       if (!IsPointingTowardsOrigin(object)) {
         ROS_ERROR("object orientation incorrect!");
+	ROS_ERROR("object has the dimension of (%f, %f, %f)", object.dimensions.x, object.dimensions.y, object.dimensions.z);
       }
     }
     surfaces_objects_vec->push_back(surface_objects);

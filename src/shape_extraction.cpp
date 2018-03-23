@@ -168,6 +168,7 @@ bool FitBox(const PointCloudC::Ptr& input,
     return false;
   }
 
+  double last_x_min, last_x_max, last_y_min, last_y_max;
   // Try fitting a rectangle
   for (size_t i = 0; i < hull.size() - 1; ++i) {
     // For each pair of hull points, determine the angle
@@ -226,39 +227,44 @@ bool FitBox(const PointCloudC::Ptr& input,
       pose->position.y = pose3f(1);
       pose->position.z = pose3f(2);
 
-      // Flip orientation if necessary to force x dimension < y dimension
-      double x_dim = x_max - x_min;
-      double y_dim = y_max - y_min;
-      if (x_dim > y_dim) {
-        Eigen::Vector3f y_axis = transformation.col(1);
-        // There are two choices for the new x axis. This chooses the one that
-        // is closer to the positive x direction of the data.
-        if (y_axis.x() < 0) {
-          y_axis = -1 * transformation.col(1);
-        }
-        transformation.col(0) = y_axis;
-        transformation.col(1) =
-            transformation.col(2).cross(transformation.col(0));
-      }
-
-      if (x_dim > y_dim) {
-        dimensions->x = (y_max - y_min);
-        dimensions->y = (x_max - x_min);
-      } else {
-        dimensions->x = (x_max - x_min);
-        dimensions->y = (y_max - y_min);
-      }
-      dimensions->z = height;
-
-      Eigen::Quaternionf q(transformation);
-      pose->orientation.x = q.x();
-      pose->orientation.y = q.y();
-      pose->orientation.z = q.z();
-      pose->orientation.w = q.w();
+      last_x_max = x_max;
+      last_x_min = x_min;
+      last_y_max = y_max;
+      last_y_min = y_min;
 
       min_volume = area * height;
     }
   }
+
+  // Flip orientation if necessary to force x dimension < y dimension
+  double x_dim = last_x_max - last_x_min;
+  double y_dim = last_y_max - last_y_min;
+  if (x_dim > y_dim) {
+    Eigen::Vector3f y_axis = transformation.col(1);
+    // There are two choices for the new x axis. This chooses the one that
+    // is closer to the positive x direction of the data.
+    if (y_axis.x() < 0) {
+      y_axis = -1 * transformation.col(1);
+    }
+    transformation.col(0) = y_axis;
+    transformation.col(1) =
+        transformation.col(2).cross(transformation.col(0));
+  }
+
+  if (x_dim > y_dim) {
+    dimensions->x = (last_y_max - last_y_min);
+    dimensions->y = (last_x_max - last_x_min);
+  } else {
+    dimensions->x = (last_x_max - last_x_min);
+    dimensions->y = (last_y_max - last_y_min);
+  }
+  dimensions->z = height;
+
+  Eigen::Quaternionf q(transformation);
+  pose->orientation.x = q.x();
+  pose->orientation.y = q.y();
+  pose->orientation.z = q.z();
+  pose->orientation.w = q.w();
 
   return true;
 }
