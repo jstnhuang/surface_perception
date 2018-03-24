@@ -260,6 +260,10 @@ bool FitBox(const PointCloudC::Ptr& input,
   }
   dimensions->z = height;
 
+  std::stringstream ss;
+  ss << transformation;
+  ROS_INFO("Getting transformation of %s", ss.str().c_str());
+
   Eigen::Quaternionf q(transformation);
   pose->orientation.x = q.x();
   pose->orientation.y = q.y();
