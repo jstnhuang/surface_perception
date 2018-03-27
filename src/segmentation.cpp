@@ -25,7 +25,7 @@ bool SurfaceComparator(const surface_perception::Surface& s1,
 }
 
 template <class T>
-bool IsPointingTowardsOrigin(const pcl::ModelCoefficients::Ptr& coeff_ptr, const T& box) {
+bool hasCorrectBoxOrientation(const pcl::ModelCoefficients::Ptr& coeff_ptr, const T& box) {
   // Compute the expected vectors of box
   Eigen::Vector3f x_axis(1.0, 0.0, 0.0);
   Eigen::Vector3f z_axis(coeff_ptr->values[0], coeff_ptr->values[1], coeff_ptr->values[2]);
@@ -44,10 +44,12 @@ bool IsPointingTowardsOrigin(const pcl::ModelCoefficients::Ptr& coeff_ptr, const
     ROS_ERROR("The box doesn't face towards the positive x-axis.");
     res = false;
   }
+  // Check if the y-axis of the object is off
   if (object_rotation_matrix.col(1).dot(y_axis) <= 0.0) {
     ROS_ERROR("The box is far off from the expected y-axis.");
     res = false;
   }
+  // Check if the object has the same z-axis as the normal vector of the plane.
   if ((object_rotation_matrix.col(2) - z_axis).array().abs().matrix().sum() > 0.0001) {
     ROS_ERROR("The box has the wrong z-axis (%f, %f, %f) compared to expected (%f, %f, %f)",
 		    object_rotation_matrix.col(2)(0),
@@ -167,7 +169,7 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
       surfaces->push_back(surface);
     }
 
-    if (!IsPointingTowardsOrigin(surface.coefficients, surface)) {
+    if (!hasCorrectBoxOrientation(surface.coefficients, surface)) {
       ROS_ERROR("Surface orientation incorrect!");
       system("exit");
     }
@@ -274,10 +276,10 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
 
       if (FitBox(cloud, object.indices, surfaces[i].coefficients,
                  &object.pose_stamped.pose, &object.dimensions)
-		      && IsPointingTowardsOrigin(surfaces[i].coefficients, object)) {
+		      && hasCorrectBoxOrientation(surfaces[i].coefficients, object)) {
         surface_objects.objects.push_back(object);
       }
-      if (!IsPointingTowardsOrigin(surfaces[i].coefficients, object)) {
+      if (!hasCorrectBoxOrientation(surfaces[i].coefficients, object)) {
         ROS_ERROR("object orientation incorrect!");
 	ROS_ERROR("object has the dimension of (%f, %f, %f)", object.dimensions.x, object.dimensions.y, object.dimensions.z);
       }
