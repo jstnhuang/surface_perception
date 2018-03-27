@@ -41,12 +41,20 @@ bool hasCorrectBoxOrientation(const pcl::ModelCoefficients::Ptr& coeff_ptr, cons
 
   // Check if the object face towards the positive x-axis
   if (object_rotation_matrix.col(0).dot(x_axis) <= 0.0) {
-    ROS_ERROR("The box doesn't face towards the positive x-axis.");
+    ROS_ERROR("The box doesn't face towards the positive x-axis. It has x-basis (%f, %f, %f) with dot product result of %f",
+		    object_rotation_matrix.col(0)(0),
+		    object_rotation_matrix.col(0)(1),
+		    object_rotation_matrix.col(0)(2),
+		    object_rotation_matrix.col(0).dot(x_axis));
     res = false;
   }
   // Check if the y-axis of the object is off
   if (object_rotation_matrix.col(1).dot(y_axis) <= 0.0) {
-    ROS_ERROR("The box is far off from the expected y-axis.");
+    ROS_ERROR("The box is far off from the expected y-axis. It has y-basis (%f, %f, %f) with dot product result of %f",
+		    object_rotation_matrix.col(1)(0),
+		    object_rotation_matrix.col(1)(1),
+		    object_rotation_matrix.col(1)(2),
+		    object_rotation_matrix.col(1).dot(y_axis));
     res = false;
   }
   // Check if the object has the same z-axis as the normal vector of the plane.
