@@ -106,6 +106,12 @@ target_link_libraries(surface_perception_demo
   surface_perception_segmentation
   surface_perception_visualization)
 
+add_executable(surface_perception_rotation_matrix_test tests/rotation_matrix_test_main.cpp)
+set_target_properties(surface_perception_rotation_matrix_test PROPERTIES OUTPUT_NAME rotation_matrix_test PREFIX "")
+target_link_libraries(surface_perception_rotation_matrix_test
+  ${catkin_LIBRARIES}
+  surface_perception_shape_extraction)
+
 #############
 ## Install ##
 #############
@@ -123,6 +129,7 @@ target_link_libraries(surface_perception_demo
 ## Mark executables and/or libraries for installation
 install(TARGETS
   surface_perception_demo
+  surface_perception_rotation_matrix_test
   surface_perception_segmentation
   surface_perception_shape_extraction
   surface_perception_surface_finder
