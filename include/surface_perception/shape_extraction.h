@@ -33,6 +33,34 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
             const pcl::PointIndicesPtr& indices,
             const pcl::ModelCoefficients::Ptr& model, geometry_msgs::Pose* pose,
             geometry_msgs::Vector3* dimensions);
+
+/// \brief Modify the given rotation matrix to have the desired orientation.
+///
+/// The given rotation matrix should represents the orientation of the box:
+///  --         --
+///  |  |  |  |  |
+///  |  |  |  |  |
+///  |  x  y  z  |
+///  |  |  |  |  |
+///  |  |  |  |  |
+///  --         --
+///
+/// The good orientation is defined as the following:
+///  1. The angle between x-axis and the x basis vector of the rotation matrix
+///    is less than 90 degrees.
+///  2. The z basis vector is the same as the normal vector of the given plane
+///   coefficients.
+/// 
+/// After checking the conditions above with corrections, The y basis vector is
+/// then computed as the cross product of the x basis vector and z basis
+/// vector.
+///
+/// \param[in] plane_coeff The coefficient of the plane where the box lies on.
+/// \param[in] rotaton_matrix The given rotation matrix of the box.
+/// \param[out] output_matrix The corrected rotation matrix of the box.
+void MakeGoodBoxOrientation(const pcl::ModelCoefficients::Ptr& plane_coeff,
+		const Eigen::Matrix3f& rotation_matrix,
+		Eigen::Matrix3f* output_matrix);
 }  // namespace surface_perception
 
 #endif  // _SURFACE_PERCEPTION_SHAPE_EXTRACTION_

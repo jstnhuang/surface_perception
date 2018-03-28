@@ -272,4 +272,38 @@ bool FitBox(const PointCloudC::Ptr& input,
 
   return true;
 }
+
+void MakeGoodBoxOrientation(const pcl::ModelCoefficients::Ptr& plane_coeff,
+		const Eigen::Matrix3f& rotation_matrix,
+		Eigen::Matrix3f* output_matrix) {
+  // Compute the expected vectors of box
+  Eigen::Vector3f x_axis(1.0, 0.0, 0.0);
+  Eigen::Vector3f z_axis(plane_coeff->values[0], plane_coeff->values[1],
+		  plane_coeff->values[2]);
+  Eigen::Vector3f y_axis = z_axis.cross(x_axis);
+
+  // Check if the object face towards the positive x-axis
+  if (rotation_matrix.col(0).dot(x_axis) <= 0.0) {
+    ROS_WARN("The box doesn't face towards the positive x-axis. It has x-basis (%f, %f, %f) with dot product result of %f",
+		    rotation_matrix.col(0)(0),
+		    rotation_matrix.col(0)(1),
+		    rotation_matrix.col(0)(2),
+		    rotation_matrix.col(0).dot(x_axis));
+    output_matrix->col(0) = rotation_matrix.col(0) * -1.0;
+  } 
+  // Check if the object has the same z-axis as the normal vector of the plane.
+  if ((rotation_matrix.col(2) - z_axis).array().abs().matrix().sum() > 0.0001) {
+    ROS_WARN("The box has the wrong z-axis (%f, %f, %f) compared to expected (%f, %f, %f)",
+		    rotation_matrix.col(2)(0),
+		    rotation_matrix.col(2)(1),
+		    rotation_matrix.col(2)(2),
+		    z_axis(0),
+		    z_axis(1),
+		    z_axis(2));
+    output_matrix->col(2) = z_axis;
+  }
+
+  // Compute the y-basis based on the
+  return res;
+}
 }  // namespace surface_perception
