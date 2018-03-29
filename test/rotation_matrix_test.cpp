@@ -1,38 +1,12 @@
-#include "Eigen/Eigen"
-#include "ros/ros.h"
-
 #include "surface_perception/shape_extraction.h"
+#include "Eigen/Eigen"
 
-enum matrix_option {
-  standard_axises,
-  inverted_axises,
-  random_rotation
-};
+#include "pcl/ModelCoefficients.h"
 
-bool GetMatrix(const matrix_option& option, bool dimension_inverted,
-		Eigen::Matrix3f test_matrix,
-		Eigen::Matrix3f expected_matrix) {
-  if (option == matrix_option::standard_axises) {
-    
-  } else if (option == matrix_option::inverted_axises) {
-  } else if (option == matrix_option::random_rotation) {
-  } else {
-    ROS_ERROR("Invalid option for GetMatrix function in rotation_matrix_test");
-    return false;
-  }
-
-  if (dimension_inverted) {
-    Eigen::Vector3f y_axis = expected_matrix.col(1);
-    expected_matrix.col(1) = expected_matrix.col(0);
-    expected_matrix.col(0) = y_axis;
-    expected_matrix.col(2) = expected_matrix.col(0).cross(expected_matrix.col(1));
-  }
-
-  return true;
-}
-
+#include <gtest/gtest.h>
+namespace {
 // This test the equality of two matrix through approximation.
-bool AssertMatrix(const Eigen::Matrix3f& actual_matrix,
+bool isSameMatrix(const Eigen::Matrix3f& actual_matrix,
 		const Eigen::Matrix3f& expected_matrix) {
   // Check matrix dimensions before testing content
   if (actual_matrix.cols() != expected_matrix.cols()
@@ -42,9 +16,78 @@ bool AssertMatrix(const Eigen::Matrix3f& actual_matrix,
 
   return (actual_matrix - expected_matrix).array().abs().matrix().sum() < 0.0001;
 }
+}  // Anonymous namespace
+
+namespace surface_perception {
+
+// Plane structure for constant declaration
+struct plane_model {
+  float x;
+  float y;
+  float z;
+  float d;
+};
+
+// Constant flat plane
+const plane_model flat_plane = {
+  0.0,
+  0.0,
+  1.0,
+  0.0
+};
+
+// Constant tilted plane
+const plane_model tilted_plane = {
+  0.01,
+  0.5,
+  0.86597,
+  0.1
+};
+
+// Consant dimensions
+const double long_side = 2.0;
+const double short_side = 1.0;
+
+TEST(TestMakeGoodBoxOrientation, standard_axises) {
+  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
+  model->values.resize(4);
+  model->values[0] = flat_plane.x;
+  model->values[1] = flat_plane.y;
+  model->values[2] = flat_plane.z;
+  model->values[3] = flat_plane.d;
+
+  Eigen::Matrix3f expected_matrix;
+  expected_matrix << 1.0, 0.0, 0.0,
+		  0.0, 1.0, 0.0,
+		  0.0, 0.0, 1.0;
+
+  Eigen::Matrix3f input_matrix;
+  input_matrix << 1.0, 0.0, 0.0,
+	      0.0, 1.0, 0.0,
+	      0.0, 0.0, 1.0;
+
+  Eigen::Matrix3f actual_matrix;
+  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+
+  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+}
+
+TEST(TestMakeGoodBoxOrientation, swapping_x_y_basis_vectors) {
+}
+
+TEST(TestMakeGoodBoxOrientation, inverted_axises) {
+}
+
+TEST(TestMakeGoodBoxOrientation, tilted_45degrees_xy_plane) {
+}
+
+TEST(TestMakeGoodBoxOrientation, tilted_135degrees_xy_plane) {
+}
+
+}  // surface_perception namespace
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "rotation_matrix_test");
+  testing::InitGoogleTest(&argc, argv);
 
-  return 0;
+  return RUN_ALL_TESTS();
 }

@@ -46,8 +46,8 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 ///  --         --
 ///
 /// The good orientation is defined as the following:
-///  1. If x dimension of the box must be smaller than y dimension. If not,
-///   x basis vector and y basis vector should be swapped.
+///  1. If x dimension of the box must be smaller than or equal to y dimension.
+///   If not, x basis vector and y basis vector should be swapped.
 ///  2. The angle between x-axis and the x basis vector of the rotation matrix
 ///   is less than 90 degrees.
 ///  3. The z basis vector is the same as the normal vector of the given plane
