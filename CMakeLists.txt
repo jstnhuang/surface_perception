@@ -106,12 +106,6 @@ target_link_libraries(surface_perception_demo
   surface_perception_segmentation
   surface_perception_visualization)
 
-add_executable(surface_perception_rotation_matrix_test tests/rotation_matrix_test_main.cpp)
-set_target_properties(surface_perception_rotation_matrix_test PROPERTIES OUTPUT_NAME rotation_matrix_test PREFIX "")
-target_link_libraries(surface_perception_rotation_matrix_test
-  ${catkin_LIBRARIES}
-  surface_perception_shape_extraction)
-
 #############
 ## Install ##
 #############
@@ -129,7 +123,6 @@ target_link_libraries(surface_perception_rotation_matrix_test
 ## Mark executables and/or libraries for installation
 install(TARGETS
   surface_perception_demo
-  surface_perception_rotation_matrix_test
   surface_perception_segmentation
   surface_perception_shape_extraction
   surface_perception_surface_finder
@@ -156,6 +149,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
+
+catkin_add_gtest(surface_perception_shape_extraction-test test/rotation_matrix_test.cpp)
+if(TARGET surface_perception_shape_extraction-test)
+  target_link_libraries(surface_perception_shape_extraction-test surface_perception_shape_extraction)
+endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
