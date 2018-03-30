@@ -62,12 +62,6 @@ void ObjectMarkers(const std::vector<Object>& objects,
     marker.color.g = 1;
     marker.color.a = 0.5;
     markers->push_back(marker);
-
-    Marker axesMarker;
-    hcr_common_markers::GetAxesMarker(&axesMarker);
-    axesMarker.header = object.pose_stamped.header;
-    axesMarker.pose = object.pose_stamped.pose;
-    markers->push_back(axesMarker);
   }
 }
 
@@ -89,6 +83,13 @@ void SurfaceMarkers(const std::vector<SurfaceObjects>& surfaces,
       object_markers[obj_i].ns = obj_ns.str();
       object_markers[obj_i].id = obj_i;
       markers->push_back(object_markers[obj_i]);
+
+      std::stringstream axes_ns;
+      axes_ns << "object_" << obj_i;
+      axes_ns << "_axes";
+      Marker axesMarker = hcr_common_markers::GetAxesMarker(axes_ns.str(), object_markers[obj_i].pose, 0.1);
+      axesMarker.header = object_markers[obj_i].header;
+      markers->push_back(axesMarker);
     }
   }
 }
