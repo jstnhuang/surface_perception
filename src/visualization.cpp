@@ -85,9 +85,12 @@ void SurfaceMarkers(const std::vector<SurfaceObjects>& surfaces,
       markers->push_back(object_markers[obj_i]);
 
       std::stringstream axes_ns;
-      axes_ns << "object_" << obj_i;
+      axes_ns << obj_ns.str() << "_object_" << obj_i;
       axes_ns << "_axes";
-      Marker axesMarker = hcr_common_markers::GetAxesMarker(axes_ns.str(), object_markers[obj_i].pose, 0.1);
+      Marker axesMarker = hcr_common_markers::GetAxesMarker(axes_ns.str(),
+		      object_markers[obj_i].pose,
+		      std::min(object_markers[obj_i].scale.x,
+			      object_markers[obj_i].scale.y) / 2.0);
       axesMarker.header = object_markers[obj_i].header;
       markers->push_back(axesMarker);
     }
