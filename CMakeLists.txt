@@ -9,6 +9,7 @@ project(surface_perception)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
+  hcr_common_markers
   geometry_msgs
   pcl_conversions
   roscpp

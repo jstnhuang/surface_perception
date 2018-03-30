@@ -7,6 +7,7 @@
 #include "visualization_msgs/Marker.h"
 
 #include "surface_perception/surface_objects.h"
+#include "hcr_common_markers/axes_marker.h"
 
 using visualization_msgs::Marker;
 
@@ -61,6 +62,12 @@ void ObjectMarkers(const std::vector<Object>& objects,
     marker.color.g = 1;
     marker.color.a = 0.5;
     markers->push_back(marker);
+
+    Marker axesMarker;
+    hcr_common_markers::GetAxesMarker(&axesMarker);
+    axesMarker.header = object.pose_stamped.header;
+    axesMarker.pose = object.pose_stamped.pose;
+    markers->push_back(axesMarker);
   }
 }
 
