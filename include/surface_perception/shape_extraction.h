@@ -44,6 +44,7 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 ///  |  |  |  |  |
 ///  |  |  |  |  |
 ///  --         --
+/// Note: x, y, z in the figure above are basis vectors.
 ///
 /// The good orientation is defined as the following:
 ///  1. If x dimension of the box must be smaller than or equal to y dimension.

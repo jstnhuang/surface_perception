@@ -289,7 +289,9 @@ void MakeGoodBoxOrientation(const pcl::ModelCoefficients::Ptr& plane_coeff,
   Eigen::Vector3f y_axis = z_axis.cross(x_axis);
 
   // Check if the object is facing towards or perpendicular to the positive
-  // x-axis
+  // x-axis. If not, the angle theta between x basis vector and x axis should be
+  // 90 < theta <= 180, which means the result of dot product of the two
+  // vectors would be negative.
   if (output_matrix->col(0).dot(x_axis) < 0.0) {
     ROS_WARN(
         "The box doesn't face towards the positive x-axis. It has x basis "
