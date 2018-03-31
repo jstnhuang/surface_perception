@@ -5,6 +5,7 @@
 
 #include "ros/ros.h"
 #include "visualization_msgs/Marker.h"
+#include "visualization_msgs/MarkerArray.h"
 
 #include "surface_perception/surface_objects.h"
 #include "hcr_common_markers/axes_marker.h"
@@ -79,6 +80,7 @@ void SurfaceMarkers(const std::vector<SurfaceObjects>& surfaces,
     obj_ns << "surface_" << surface_i;
     std::vector<Marker> object_markers;
     ObjectMarkers(surface_objects.objects, &object_markers);
+
     for (size_t obj_i = 0; obj_i < object_markers.size(); ++obj_i) {
       object_markers[obj_i].ns = obj_ns.str();
       object_markers[obj_i].id = obj_i;
@@ -87,12 +89,16 @@ void SurfaceMarkers(const std::vector<SurfaceObjects>& surfaces,
       std::stringstream axes_ns;
       axes_ns << obj_ns.str() << "_object_" << obj_i;
       axes_ns << "_axes";
-      Marker axesMarker = hcr_common_markers::GetAxesMarker(axes_ns.str(),
-		      object_markers[obj_i].pose,
-		      std::min(object_markers[obj_i].scale.x,
-			      object_markers[obj_i].scale.y) / 2.0);
-      axesMarker.header = object_markers[obj_i].header;
-      markers->push_back(axesMarker);
+      visualization_msgs::MarkerArray axesMarkers =
+	      hcr_common_markers::GetAxesMarkerArray(axes_ns.str(),
+			      object_markers[obj_i].header.frame_id,
+			      object_markers[obj_i].pose,
+			      std::min(object_markers[obj_i].scale.x,
+				      object_markers[obj_i].scale.y) / 2.0);
+
+      for (size_t axis_i = 0; axis_i < axesMarkers.markers.size(); ++axis_i) {
+        markers->push_back(axesMarkers.markers[axis_i]);
+      }
     }
   }
 }
