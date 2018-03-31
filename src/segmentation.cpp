@@ -1,6 +1,5 @@
 #include "surface_perception/segmentation.h"
 
-#include <sstream>
 #include <vector>
 
 #include "Eigen/Eigen"
@@ -24,53 +23,6 @@ bool SurfaceComparator(const surface_perception::Surface& s1,
   return s1.pose_stamped.pose.position.z < s2.pose_stamped.pose.position.z;
 }
 
-template <class T>
-bool hasCorrectBoxOrientation(const pcl::ModelCoefficients::Ptr& coeff_ptr, const T& box) {
-  // Compute the expected vectors of box
-  Eigen::Vector3f x_axis(1.0, 0.0, 0.0);
-  Eigen::Vector3f z_axis(coeff_ptr->values[0], coeff_ptr->values[1], coeff_ptr->values[2]);
-  Eigen::Vector3f y_axis = z_axis.cross(x_axis);
-
-  Eigen::Quaternionf box_quaternion(box.pose_stamped.pose.orientation.w,
-		  box.pose_stamped.pose.orientation.x,
-		  box.pose_stamped.pose.orientation.y,
-		  box.pose_stamped.pose.orientation.z);
-  Eigen::Matrix3f object_rotation_matrix = box_quaternion.toRotationMatrix();
-
-  bool res = true;
-
-  // Check if the object face towards the positive x-axis
-  if (object_rotation_matrix.col(0).dot(x_axis) <= 0.0) {
-    ROS_ERROR("The box doesn't face towards the positive x-axis. It has x-basis (%f, %f, %f) with dot product result of %f",
-		    object_rotation_matrix.col(0)(0),
-		    object_rotation_matrix.col(0)(1),
-		    object_rotation_matrix.col(0)(2),
-		    object_rotation_matrix.col(0).dot(x_axis));
-    res = false;
-  }
-  // Check if the y-axis of the object is off
-  if (object_rotation_matrix.col(1).dot(y_axis) <= 0.0) {
-    ROS_ERROR("The box is far off from the expected y-axis. It has y-basis (%f, %f, %f) with dot product result of %f",
-		    object_rotation_matrix.col(1)(0),
-		    object_rotation_matrix.col(1)(1),
-		    object_rotation_matrix.col(1)(2),
-		    object_rotation_matrix.col(1).dot(y_axis));
-    res = false;
-  }
-  // Check if the object has the same z-axis as the normal vector of the plane.
-  if ((object_rotation_matrix.col(2) - z_axis).array().abs().matrix().sum() > 0.0001) {
-    ROS_ERROR("The box has the wrong z-axis (%f, %f, %f) compared to expected (%f, %f, %f)",
-		    object_rotation_matrix.col(2)(0),
-		    object_rotation_matrix.col(2)(1),
-		    object_rotation_matrix.col(2)(2),
-		    z_axis(0),
-		    z_axis(1),
-		    z_axis(2));
-    res = false;
-  }
-
-  return res;
-}
 }  // Anonymous namespace
 
 namespace surface_perception {
@@ -176,11 +128,6 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
       surface.pose_stamped.pose.position.z -= offset;
       surfaces->push_back(surface);
     }
-
-    if (!hasCorrectBoxOrientation(surface.coefficients, surface)) {
-      ROS_ERROR("Surface orientation incorrect!");
-      system("exit");
-    }
   }
 
   return true;
@@ -283,13 +230,8 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
       object.pose_stamped.header.frame_id = cloud->header.frame_id;
 
       if (FitBox(cloud, object.indices, surfaces[i].coefficients,
-                 &object.pose_stamped.pose, &object.dimensions)
-		      && hasCorrectBoxOrientation(surfaces[i].coefficients, object)) {
+                 &object.pose_stamped.pose, &object.dimensions)) {
         surface_objects.objects.push_back(object);
-      }
-      if (!hasCorrectBoxOrientation(surfaces[i].coefficients, object)) {
-        ROS_ERROR("object orientation incorrect!");
-	ROS_ERROR("object has the dimension of (%f, %f, %f)", object.dimensions.x, object.dimensions.y, object.dimensions.z);
       }
     }
     surfaces_objects_vec->push_back(surface_objects);
