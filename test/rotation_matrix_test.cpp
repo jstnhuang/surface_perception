@@ -50,10 +50,7 @@ TEST(TestMakeGoodBoxOrientation, standard_axises_horizontal_plane) {
 		  model->values[2]);
   expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
 
-  Eigen::Matrix3f input_matrix;
-  input_matrix << 1.0, 0.0, 0.0,
-	      0.0, 1.0, 0.0,
-	      0.0, 0.0, 1.0;
+  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
   Eigen::Matrix3f actual_matrix;
   MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
@@ -72,10 +69,7 @@ TEST(TestMakeGoodBoxOrientation, standard_axises_tilted_plane) {
 		  model->values[2]);
   expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
 
-  Eigen::Matrix3f input_matrix;
-  input_matrix << 1.0, 0.0, 0.0,
-	      0.0, 1.0, 0.0,
-	      0.0, 0.0, 1.0;
+  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
   Eigen::Matrix3f actual_matrix;
   MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
@@ -95,10 +89,7 @@ TEST(TestMakeGoodBoxOrientation, inverted_axises_horizontal_plane) {
 		  model->values[2]);
   expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
 
-  Eigen::Matrix3f input_matrix;
-  input_matrix << -1.0, 0.0, 0.0,
-	      0.0, -1.0, 0.0,
-	      0.0, 0.0, -1.0;
+  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity() * -1.0;
 
   Eigen::Matrix3f actual_matrix;
   MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
@@ -117,10 +108,7 @@ TEST(TestMakeGoodBoxOrientation, inverted_axises_tilted_plane) {
 		  model->values[2]);
   expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
 
-  Eigen::Matrix3f input_matrix;
-  input_matrix << -1.0, 0.0, 0.0,
-	      0.0, -1.0, 0.0,
-	      0.0, 0.0, -1.0;
+  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity() * -1.0;
 
   Eigen::Matrix3f actual_matrix;
   MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
@@ -139,10 +127,7 @@ TEST(TestMakeGoodBoxOrientation, swapping_x_y_basis_vectors_horizontal_plane) {
 		  model->values[2]);
   expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
 
-  Eigen::Matrix3f input_matrix;
-  input_matrix << 1.0, 0.0, 0.0,
-	      0.0, 1.0, 0.0,
-	      0.0, 0.0, 1.0;
+  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
   Eigen::Matrix3f actual_matrix;
   MakeGoodBoxOrientation(model, long_side, short_side, input_matrix, &actual_matrix);
@@ -161,10 +146,7 @@ TEST(TestMakeGoodBoxOrientation, swapping_x_y_basis_vectors_tilted_plane) {
 		  model->values[2]);
   expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
 
-  Eigen::Matrix3f input_matrix;
-  input_matrix << 1.0, 0.0, 0.0,
-	      0.0, 1.0, 0.0,
-	      0.0, 0.0, 1.0;
+  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
   Eigen::Matrix3f actual_matrix;
   MakeGoodBoxOrientation(model, long_side, short_side, input_matrix, &actual_matrix);
