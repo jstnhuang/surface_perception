@@ -240,7 +240,8 @@ bool FitBox(const PointCloudC::Ptr& input,
   double x_dim = last_x_max - last_x_min;
   double y_dim = last_y_max - last_y_min;
 
-  Eigen::Matrix3f adjusted_transformation = StandardizeBoxOrientation(x_dim, y_dim, transformation);
+  Eigen::Matrix3f adjusted_transformation = StandardizeBoxOrientation(x_dim,
+		  y_dim, transformation);
 
   if (x_dim > y_dim) {
     dimensions->x = (last_y_max - last_y_min);
@@ -282,19 +283,17 @@ Eigen::Matrix3f StandardizeBoxOrientation(double x_dimension,
   }
   output_matrix.col(2) = rotation_matrix.col(2);
 
-  // Compute the approximated expected vectors of box
-  Eigen::Vector3f x_axis(1.0, 0.0, 0.0);
-  Eigen::Vector3f y_axis = rotation_matrix.col(2).cross(x_axis);
-
   // Check if the object is facing towards or perpendicular to the positive
   // x-axis. If not, the angle theta between x basis vector and x axis should be
   // 90 < theta <= 180, which means the result of dot product of the two
   // vectors would be negative.
+  Eigen::Vector3f x_axis(1.0, 0.0, 0.0);
   if (output_matrix.col(0).dot(x_axis) < 0.0) {
     output_matrix.col(0) = output_matrix.col(0) * -1.0;
   }
 
-  // Compute the y basis vector based on the
+  // Compute the y basis vector using the cross product of x basis vector
+  // and z basis vector.
   output_matrix.col(1) = output_matrix.col(2).cross(output_matrix.col(0));
 
   return output_matrix;
