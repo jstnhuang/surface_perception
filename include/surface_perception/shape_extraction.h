@@ -36,16 +36,6 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 
 /// \brief Modify the given rotation matrix to have the desired orientation.
 ///
-/// The given rotation matrix should represents the orientation of the box:
-///  --         --
-///  |  |  |  |  |
-///  |  |  |  |  |
-///  |  x  y  z  |
-///  |  |  |  |  |
-///  |  |  |  |  |
-///  --         --
-/// Note: x, y, z in the figure above are basis vectors.
-///
 /// The good orientation is defined as the following:
 ///  1. If x dimension of the box must be smaller than or equal to y dimension.
 ///   If not, x basis vector and y basis vector should be swapped.
