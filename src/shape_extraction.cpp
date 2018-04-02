@@ -168,7 +168,10 @@ bool FitBox(const PointCloudC::Ptr& input,
     return false;
   }
 
-  double last_x_min, last_x_max, last_y_min, last_y_max;
+  // Record the best dimensions
+  double best_x_dim = 0.0;
+  double best_y_dim = 0.0;
+
   // Try fitting a rectangle
   for (size_t i = 0; i < hull.size() - 1; ++i) {
     // For each pair of hull points, determine the angle
@@ -227,30 +230,24 @@ bool FitBox(const PointCloudC::Ptr& input,
       pose->position.y = pose3f(1);
       pose->position.z = pose3f(2);
 
-      last_x_max = x_max;
-      last_x_min = x_min;
-      last_y_max = y_max;
-      last_y_min = y_min;
+      best_x_dim = x_max - x_min;
+      best_y_dim = y_max - y_min;
 
       min_volume = area * height;
     }
   }
 
-  
-  double x_dim = last_x_max - last_x_min;
-  double y_dim = last_y_max - last_y_min;
-
   Eigen::Matrix3f adjusted_transformation = StandardizeBoxOrientation(
 		  transformation,
-		  x_dim,
-		  y_dim);
+		  best_x_dim,
+		  best_y_dim);
 
-  if (x_dim > y_dim) {
-    dimensions->x = (last_y_max - last_y_min);
-    dimensions->y = (last_x_max - last_x_min);
+  if (best_x_dim > best_y_dim) {
+    dimensions->x = best_y_dim;
+    dimensions->y = best_x_dim;
   } else {
-    dimensions->x = (last_x_max - last_x_min);
-    dimensions->y = (last_y_max - last_y_min);
+    dimensions->x = best_x_dim;
+    dimensions->y = best_y_dim;
   }
   dimensions->z = height;
 
