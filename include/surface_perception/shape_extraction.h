@@ -63,11 +63,10 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 /// \param[in] y_dimension The current y dimension of the box.
 /// \param[in] rotaton_matrix The given rotation matrix of the box.
 /// \param[out] output_matrix The corrected rotation matrix of the box.
-void MakeGoodBoxOrientation(const pcl::ModelCoefficients::Ptr& plane_coeff,
+Eigen::Matrix3f StandardizeBoxOrientation(const pcl::ModelCoefficients::Ptr& plane_coeff,
 		double x_dimension,
 		double y_dimension,
-		const Eigen::Matrix3f& rotation_matrix,
-		Eigen::Matrix3f* output_matrix);
+		const Eigen::Matrix3f& rotation_matrix);
 }  // namespace surface_perception
 
 #endif  // _SURFACE_PERCEPTION_SHAPE_EXTRACTION_
