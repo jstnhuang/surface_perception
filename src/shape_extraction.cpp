@@ -240,7 +240,7 @@ bool FitBox(const PointCloudC::Ptr& input,
   double x_dim = last_x_max - last_x_min;
   double y_dim = last_y_max - last_y_min;
 
-  Eigen::Matrix3f adjusted_transformation = StandardizeBoxOrientation(model, x_dim, y_dim, transformation);
+  Eigen::Matrix3f adjusted_transformation = StandardizeBoxOrientation(x_dim, y_dim, transformation);
 
   if (x_dim > y_dim) {
     dimensions->x = (last_y_max - last_y_min);
@@ -260,11 +260,12 @@ bool FitBox(const PointCloudC::Ptr& input,
   return true;
 }
 
-Eigen::Matrix3f StandardizeBoxOrientation(const pcl::ModelCoefficients::Ptr& plane_coeff,
-		double x_dimension,
+Eigen::Matrix3f StandardizeBoxOrientation(double x_dimension,
 		double y_dimension,
 		const Eigen::Matrix3f& rotation_matrix) {
-  Eigen::Matrix3f output_matrix = Eigen::Matrix3f::Zero();
+  // The matrix to be outputed
+  Eigen::Matrix3f output_matrix;
+
   // Flip orientation if necessary to force x dimension < y dimension
   if (x_dimension > y_dimension) {
     Eigen::Vector3f y_axis = rotation_matrix.col(1);
@@ -283,31 +284,14 @@ Eigen::Matrix3f StandardizeBoxOrientation(const pcl::ModelCoefficients::Ptr& pla
 
   // Compute the approximated expected vectors of box
   Eigen::Vector3f x_axis(1.0, 0.0, 0.0);
-  Eigen::Vector3f z_axis(plane_coeff->values[0], plane_coeff->values[1],
-                         plane_coeff->values[2]);
-  Eigen::Vector3f y_axis = z_axis.cross(x_axis);
+  Eigen::Vector3f y_axis = rotation_matrix.col(2).cross(x_axis);
 
   // Check if the object is facing towards or perpendicular to the positive
   // x-axis. If not, the angle theta between x basis vector and x axis should be
   // 90 < theta <= 180, which means the result of dot product of the two
   // vectors would be negative.
   if (output_matrix.col(0).dot(x_axis) < 0.0) {
-    ROS_WARN(
-        "The box doesn't face towards the positive x-axis. It has x basis "
-        "vector (%f, %f, %f) with dot product result of %f",
-        output_matrix.col(0)(0), output_matrix.col(0)(1),
-        output_matrix.col(0)(2), output_matrix.col(0).dot(x_axis));
     output_matrix.col(0) = output_matrix.col(0) * -1.0;
-  }
-
-  // Check if the object has the same z-axis as the normal vector of the plane.
-  if ((output_matrix.col(2) - z_axis).array().abs().matrix().sum() > 0.0001) {
-    ROS_WARN(
-        "The box has the wrong z basis vector (%f, %f, %f) compared to "
-        "expected (%f, %f, %f)",
-        output_matrix.col(2)(0), output_matrix.col(2)(1),
-        output_matrix.col(2)(2), z_axis(0), z_axis(1), z_axis(2));
-    output_matrix.col(2) = z_axis;
   }
 
   // Compute the y basis vector based on the
