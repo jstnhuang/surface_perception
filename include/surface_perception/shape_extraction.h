@@ -58,11 +58,8 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 /// \return A rotation matrix with the standardized box orientation is returned,
 ///  based on the given rotation matrix and dimensions.
 Eigen::Matrix3f StandardizeBoxOrientation(
-		const Eigen::Matrix3f& rotation_matrix,
-		double x_dim,
-		double y_dim,
-		double* updated_x_dim,
-		double* updated_y_dim);
+    const Eigen::Matrix3f& rotation_matrix, double x_dim, double y_dim,
+    double* updated_x_dim, double* updated_y_dim);
 }  // namespace surface_perception
 
 #endif  // _SURFACE_PERCEPTION_SHAPE_EXTRACTION_

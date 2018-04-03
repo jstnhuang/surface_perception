@@ -237,13 +237,10 @@ bool FitBox(const PointCloudC::Ptr& input,
     }
   }
 
-  Eigen::Matrix3f adjusted_transformation = StandardizeBoxOrientation(
-		  transformation,
-		  best_x_dim,
-		  best_y_dim,
-		  &(dimensions->x),
-		  &(dimensions->y));
- 
+  Eigen::Matrix3f adjusted_transformation =
+      StandardizeBoxOrientation(transformation, best_x_dim, best_y_dim,
+                                &(dimensions->x), &(dimensions->y));
+
   dimensions->z = height;
 
   Eigen::Quaternionf q(adjusted_transformation);
@@ -256,11 +253,8 @@ bool FitBox(const PointCloudC::Ptr& input,
 }
 
 Eigen::Matrix3f StandardizeBoxOrientation(
-		const Eigen::Matrix3f& rotation_matrix,
-		double x_dim,
-		double y_dim,
-		double* updated_x_dim,
-		double* updated_y_dim) {
+    const Eigen::Matrix3f& rotation_matrix, double x_dim, double y_dim,
+    double* updated_x_dim, double* updated_y_dim) {
   // The matrix to be outputed
   Eigen::Matrix3f output_matrix;
 
