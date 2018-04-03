@@ -240,15 +240,10 @@ bool FitBox(const PointCloudC::Ptr& input,
   Eigen::Matrix3f adjusted_transformation = StandardizeBoxOrientation(
 		  transformation,
 		  best_x_dim,
-		  best_y_dim);
-
-  if (best_x_dim > best_y_dim) {
-    dimensions->x = best_y_dim;
-    dimensions->y = best_x_dim;
-  } else {
-    dimensions->x = best_x_dim;
-    dimensions->y = best_y_dim;
-  }
+		  best_y_dim,
+		  &(dimensions->x),
+		  &(dimensions->y));
+ 
   dimensions->z = height;
 
   Eigen::Quaternionf q(adjusted_transformation);
@@ -262,13 +257,15 @@ bool FitBox(const PointCloudC::Ptr& input,
 
 Eigen::Matrix3f StandardizeBoxOrientation(
 		const Eigen::Matrix3f& rotation_matrix,
-		double x_dimension,
-		double y_dimension) {
+		double x_dim,
+		double y_dim,
+		double* updated_x_dim,
+		double* updated_y_dim) {
   // The matrix to be outputed
   Eigen::Matrix3f output_matrix;
 
   // Flip orientation if necessary to force x dimension < y dimension
-  if (x_dimension > y_dimension) {
+  if (x_dim > y_dim) {
     Eigen::Vector3f y_axis = rotation_matrix.col(1);
     // There are two choices for the new x axis. This chooses the one that
     // is closer to the positive x direction of the data.
@@ -282,6 +279,15 @@ Eigen::Matrix3f StandardizeBoxOrientation(
     output_matrix.col(1) = rotation_matrix.col(1);
   }
   output_matrix.col(2) = rotation_matrix.col(2);
+
+  // Update the dimensions
+  if (x_dim > y_dim) {
+    *updated_x_dim = y_dim;
+    *updated_y_dim = x_dim;
+  } else {
+    *updated_x_dim = x_dim;
+    *updated_y_dim = y_dim;
+  }
 
   return output_matrix;
 }
