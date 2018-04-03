@@ -7,7 +7,7 @@
 #include "visualization_msgs/Marker.h"
 #include "visualization_msgs/MarkerArray.h"
 
-#include "hcr_common_markers/axes_marker.h"
+#include "surface_perception/axes_marker.h"
 #include "surface_perception/surface_objects.h"
 
 using visualization_msgs::Marker;
@@ -90,7 +90,7 @@ void SurfaceMarkers(const std::vector<SurfaceObjects>& surfaces,
       axes_ns << obj_ns.str() << "_object_" << obj_i;
       axes_ns << "_axes";
       visualization_msgs::MarkerArray axesMarkers =
-          hcr_common_markers::GetAxesMarkerArray(
+          GetAxesMarkerArray(
               axes_ns.str(), object_markers[obj_i].header.frame_id,
               object_markers[obj_i].pose,
               std::min(object_markers[obj_i].scale.x,

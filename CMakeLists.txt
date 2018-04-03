@@ -9,7 +9,6 @@ project(surface_perception)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
-  hcr_common_markers
   geometry_msgs
   pcl_conversions
   roscpp
@@ -68,6 +67,12 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
 )
 
+add_library(surface_perception_axes_marker src/axes_marker.cpp)
+add_dependencies(surface_perception_axes_marker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(surface_perception_axes_marker
+  ${catkin_LIBRARIES}
+)
+
 add_library(surface_perception_segmentation src/segmentation.cpp)
 add_dependencies(surface_perception_segmentation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(surface_perception_segmentation
@@ -98,6 +103,7 @@ target_link_libraries(surface_perception_surface_history_recorder
 add_library(surface_perception_visualization src/visualization.cpp)
 add_dependencies(surface_perception_visualization ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(surface_perception_visualization
+  surface_perception_axes_marker
   ${catkin_LIBRARIES})
 
 add_executable(surface_perception_demo src/demo_main.cpp)
