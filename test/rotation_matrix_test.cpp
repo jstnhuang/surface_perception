@@ -5,18 +5,6 @@
 
 #include <gtest/gtest.h>
 namespace {
-// This test the equality of two matrix through approximation.
-bool isSameMatrix(const Eigen::Matrix3f& actual_matrix,
-		const Eigen::Matrix3f& expected_matrix) {
-  // Check matrix dimensions before testing content
-  if (actual_matrix.cols() != expected_matrix.cols()
-		  || actual_matrix.rows() != expected_matrix.rows()) {
-    return false;
-  }
-
-  return (actual_matrix - expected_matrix).array().abs().matrix().sum() < 0.0001;
-}
-
 void getHorizontalPlane(pcl::ModelCoefficients::Ptr model) {
   model->values.resize(4);
   model->values[0] = 0.0;
@@ -36,10 +24,10 @@ void getTiltedPlane(pcl::ModelCoefficients::Ptr model) {
 
 namespace surface_perception {
 // Consant dimensions
-const double long_side = 2.0;
-const double short_side = 1.0;
+const double kLongSide = 2.0;
+const double kShortSide = 1.0;
 
-TEST(TestMakeGoodBoxOrientation, standard_axises_horizontal_plane) {
+TEST(TestStandardizeBoxOrientation, standard_axises_horizontal_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getHorizontalPlane(model);
 
@@ -52,13 +40,13 @@ TEST(TestMakeGoodBoxOrientation, standard_axises_horizontal_plane) {
 
   Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.000001));
 }
 
-TEST(TestMakeGoodBoxOrientation, standard_axises_tilted_plane) {
+TEST(TestStandardizeBoxOrientation, standard_axises_tilted_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getTiltedPlane(model);
 
@@ -71,14 +59,14 @@ TEST(TestMakeGoodBoxOrientation, standard_axises_tilted_plane) {
 
   Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 
 
-TEST(TestMakeGoodBoxOrientation, inverted_axises_horizontal_plane) {
+TEST(TestStandardizeBoxOrientation, inverted_axises_horizontal_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getHorizontalPlane(model);
 
@@ -91,13 +79,13 @@ TEST(TestMakeGoodBoxOrientation, inverted_axises_horizontal_plane) {
 
   Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity() * -1.0;
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 
-TEST(TestMakeGoodBoxOrientation, inverted_axises_tilted_plane) {
+TEST(TestStandardizeBoxOrientation, inverted_axises_tilted_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getTiltedPlane(model);
 
@@ -110,13 +98,13 @@ TEST(TestMakeGoodBoxOrientation, inverted_axises_tilted_plane) {
 
   Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity() * -1.0;
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 
-TEST(TestMakeGoodBoxOrientation, swapping_x_y_basis_vectors_horizontal_plane) {
+TEST(TestStandardizeBoxOrientation, swapping_x_y_basis_vectors_horizontal_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getHorizontalPlane(model);
 
@@ -129,13 +117,13 @@ TEST(TestMakeGoodBoxOrientation, swapping_x_y_basis_vectors_horizontal_plane) {
 
   Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, long_side, short_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 
-TEST(TestMakeGoodBoxOrientation, swapping_x_y_basis_vectors_tilted_plane) {
+TEST(TestStandardizeBoxOrientation, swapping_x_y_basis_vectors_tilted_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getTiltedPlane(model);
 
@@ -148,13 +136,13 @@ TEST(TestMakeGoodBoxOrientation, swapping_x_y_basis_vectors_tilted_plane) {
 
   Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, long_side, short_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 
-TEST(TestMakeGoodBoxOrientation, tilted_45degrees_xy_direction_horizontal_plane) {
+TEST(TestStandardizeBoxOrientation, tilted_45degrees_xy_direction_horizontal_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getHorizontalPlane(model);
 
@@ -170,13 +158,13 @@ TEST(TestMakeGoodBoxOrientation, tilted_45degrees_xy_direction_horizontal_plane)
 	      0.70711, 0.70711, 0.0,
 	      0.0, 0.0, 1.0;
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 
-TEST(TestMakeGoodBoxOrientation, tilted_45degrees_xy_direction_tilted_plane) {
+TEST(TestStandardizeBoxOrientation, tilted_45degrees_xy_direction_tilted_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getTiltedPlane(model);
 
@@ -192,13 +180,13 @@ TEST(TestMakeGoodBoxOrientation, tilted_45degrees_xy_direction_tilted_plane) {
 	      0.70711, 0.70711, 0.0,
 	      0.0, 0.0, 1.0;
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 
-TEST(TestMakeGoodBoxOrientation, tilted_135degrees_xy_direction_horizontal_plane) {
+TEST(TestStandardizeBoxOrientation, tilted_135degrees_xy_direction_horizontal_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getHorizontalPlane(model);
 
@@ -214,13 +202,13 @@ TEST(TestMakeGoodBoxOrientation, tilted_135degrees_xy_direction_horizontal_plane
 	      -0.70711, 0.-70711, 0.0,
 	      0.0, 0.0, 1.0;
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 
-TEST(TestMakeGoodBoxOrientation, tilted_135degrees_xy_direction_tilted_plane) {
+TEST(TestStandardizeBoxOrientation, tilted_135degrees_xy_direction_tilted_plane) {
   pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
   getTiltedPlane(model);
 
@@ -236,10 +224,10 @@ TEST(TestMakeGoodBoxOrientation, tilted_135degrees_xy_direction_tilted_plane) {
 	      -0.70711, 0.-70711, 0.0,
 	      0.0, 0.0, 1.0;
 
-  Eigen::Matrix3f actual_matrix;
-  MakeGoodBoxOrientation(model, short_side, long_side, input_matrix, &actual_matrix);
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(isSameMatrix(actual_matrix, expected_matrix));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
 }
 }  // surface_perception namespace
 
