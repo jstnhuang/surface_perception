@@ -1,8 +1,8 @@
 #include "surface_perception/axes_marker.h"
 
 #include "Eigen/Eigen"
-#include "geometry_msgs/Pose.h"
 #include "geometry_msgs/Point.h"
+#include "geometry_msgs/Pose.h"
 #include "ros/ros.h"
 #include "std_msgs/ColorRGBA.h"
 #include "visualization_msgs/Marker.h"
@@ -10,7 +10,8 @@
 
 namespace surface_perception {
 visualization_msgs::Marker GetAxesMarker(const std::string& name_space,
-		geometry_msgs::Pose pose, double scale) {
+                                         geometry_msgs::Pose pose,
+                                         double scale) {
   visualization_msgs::Marker output_marker;
   output_marker.type = visualization_msgs::Marker::LINE_LIST;
   output_marker.ns = name_space;
@@ -83,15 +84,14 @@ visualization_msgs::Marker GetAxesMarker(const std::string& name_space,
   return output_marker;
 }
 
-visualization_msgs::MarkerArray GetAxesMarkerArray(const std::string& name_space,
-		const std::string& frame_id,
-		geometry_msgs::Pose pose, double scale) {
-
+visualization_msgs::MarkerArray GetAxesMarkerArray(
+    const std::string& name_space, const std::string& frame_id,
+    geometry_msgs::Pose pose, double scale) {
   visualization_msgs::MarkerArray res;
-  Eigen::Matrix3f rotation_matrix = Eigen::Quaternionf(pose.orientation.w,
-		  pose.orientation.x,
-		  pose.orientation.y,
-		  pose.orientation.z).toRotationMatrix();
+  Eigen::Matrix3f rotation_matrix =
+      Eigen::Quaternionf(pose.orientation.w, pose.orientation.x,
+                         pose.orientation.y, pose.orientation.z)
+          .toRotationMatrix();
 
   // X axis setup
   visualization_msgs::Marker x_axis;
@@ -114,9 +114,9 @@ visualization_msgs::MarkerArray GetAxesMarkerArray(const std::string& name_space
   x_axis.pose.orientation.w = x_quaternion.w();
 
   // Shift x axis position a bit to relocate the cylinder
-  Eigen::Vector3f x_position = Eigen::Vector3f(pose.position.x,
-		  pose.position.y, pose.position.z)
-	  + x_matrix.col(2) * scale / 2.0;
+  Eigen::Vector3f x_position =
+      Eigen::Vector3f(pose.position.x, pose.position.y, pose.position.z) +
+      x_matrix.col(2) * scale / 2.0;
   x_axis.pose.position.x = x_position(0);
   x_axis.pose.position.y = x_position(1);
   x_axis.pose.position.z = x_position(2);
@@ -148,9 +148,9 @@ visualization_msgs::MarkerArray GetAxesMarkerArray(const std::string& name_space
   y_axis.pose.orientation.w = y_quaternion.w();
 
   // Y axis position shifting
-  Eigen::Vector3f y_position = Eigen::Vector3f(pose.position.x,
-		  pose.position.y, pose.position.z)
-	  + y_matrix.col(2) * scale / 2.0;
+  Eigen::Vector3f y_position =
+      Eigen::Vector3f(pose.position.x, pose.position.y, pose.position.z) +
+      y_matrix.col(2) * scale / 2.0;
   y_axis.pose.position.x = y_position(0);
   y_axis.pose.position.y = y_position(1);
   y_axis.pose.position.z = y_position(2);
@@ -172,9 +172,9 @@ visualization_msgs::MarkerArray GetAxesMarkerArray(const std::string& name_space
 
   // Z axis orientation
   z_axis.pose.position = pose.position;
-  Eigen::Vector3f z_position = Eigen::Vector3f(pose.position.x,
-		  pose.position.y, pose.position.z)
-	  + rotation_matrix.col(2) * scale / 2.0;
+  Eigen::Vector3f z_position =
+      Eigen::Vector3f(pose.position.x, pose.position.y, pose.position.z) +
+      rotation_matrix.col(2) * scale / 2.0;
   z_axis.pose.position.x = z_position(0);
   z_axis.pose.position.y = z_position(1);
   z_axis.pose.position.z = z_position(2);

@@ -89,13 +89,12 @@ void SurfaceMarkers(const std::vector<SurfaceObjects>& surfaces,
       std::stringstream axes_ns;
       axes_ns << obj_ns.str() << "_object_" << obj_i;
       axes_ns << "_axes";
-      visualization_msgs::MarkerArray axesMarkers =
-          GetAxesMarkerArray(
-              axes_ns.str(), object_markers[obj_i].header.frame_id,
-              object_markers[obj_i].pose,
-              std::min(object_markers[obj_i].scale.x,
-                       object_markers[obj_i].scale.y) /
-                  2.0);
+      visualization_msgs::MarkerArray axesMarkers = GetAxesMarkerArray(
+          axes_ns.str(), object_markers[obj_i].header.frame_id,
+          object_markers[obj_i].pose,
+          std::min(object_markers[obj_i].scale.x,
+                   object_markers[obj_i].scale.y) /
+              2.0);
 
       for (size_t axis_i = 0; axis_i < axesMarkers.markers.size(); ++axis_i) {
         markers->push_back(axesMarkers.markers[axis_i]);

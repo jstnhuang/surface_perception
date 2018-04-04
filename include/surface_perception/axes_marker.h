@@ -46,7 +46,7 @@ visualization_msgs::Marker GetAxesMarker(const std::string& name_space,
 /// \param[in] frame_id The id of the frame where the markers will be.
 /// \param[in] pose The pose of the origin where the three axes intersect.
 /// \param[in] scale The length of each colored cylinder bars. The cylinder
-///  diameters are 10% of scale, or 1 cm if 10% scale is less than 1 cm. 
+///  diameters are 10% of scale, or 1 cm if 10% scale is less than 1 cm.
 ///
 /// \return A MarkerArray of three Marker objects is returned where x-axis is
 ///  a red cylinder, y-axis is a green cylinder and z-axis is a blue cylinder.

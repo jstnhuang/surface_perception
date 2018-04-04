@@ -1,5 +1,5 @@
-#include "surface_perception/shape_extraction.h"
 #include "Eigen/Eigen"
+#include "surface_perception/shape_extraction.h"
 
 #include "pcl/ModelCoefficients.h"
 
@@ -15,130 +15,119 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrix) {
   Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
 
   double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
+      input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
   ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate180DegreesAroundYAxis) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 1.0, 0.0, 0.0,
-		  0.0, -1.0, 0.0,
-		  0.0, 0.0, -1.0;
+  expected_matrix << 1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << -1.0, 0.0, 0.0,
-	       0.0, 1.0, 0.0,
-	       0.0, 0.0, -1.0;
+  input_matrix << -1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0;
 
   double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
+      input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
   ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate45DegreesAroundZAxis) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.70711, -0.70711, 0.0,
-		  0.70711, 0.70711, 0.0,
-		  0.0, 0.0, 1.0;
+  expected_matrix << 0.70711, -0.70711, 0.0, 0.70711, 0.70711, 0.0, 0.0, 0.0,
+      1.0;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << 0.70711, -0.70711, 0.0,
-	      0.70711, 0.70711, 0.0,
-	      0.0, 0.0, 1.0;
+  input_matrix << 0.70711, -0.70711, 0.0, 0.70711, 0.70711, 0.0, 0.0, 0.0, 1.0;
 
   double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
+      input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
   ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate135DegreesAroundZAxis) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.70711, -0.70711, 0.0,
-		  0.70711, 0.70711, 0.0,
-		  0.0, 0.0, 1.0;
+  expected_matrix << 0.70711, -0.70711, 0.0, 0.70711, 0.70711, 0.0, 0.0, 0.0,
+      1.0;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << -0.70711, 0.70711, 0.0,
-	      -0.70711, 0.-70711, 0.0,
-	      0.0, 0.0, 1.0;
+  input_matrix << -0.70711, 0.70711, 0.0, -0.70711, 0. - 70711, 0.0, 0.0, 0.0,
+      1.0;
 
   double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
+      input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
   ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrix) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.99980, 0.01732, 0.01,
-		  -0.02, 0.86580, 0.5,
-		  0.0, -0.5001, 0.86597;
+  expected_matrix << 0.99980, 0.01732, 0.01, -0.02, 0.86580, 0.5, 0.0, -0.5001,
+      0.86597;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << 0.99980, 0.01732, 0.01,
-	       -0.02, 0.86580, 0.5,
-	       0.0, -0.5001, 0.86597;
+  input_matrix << 0.99980, 0.01732, 0.01, -0.02, 0.86580, 0.5, 0.0, -0.5001,
+      0.86597;
 
   double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
+      input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
   ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrixRotate180DegreesAroundYAxis) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.99980, -0.01732, -0.01,
-		  -0.02, -0.86580, -0.5,
-		  0.0, 0.5001, -0.86597;
+  expected_matrix << 0.99980, -0.01732, -0.01, -0.02, -0.86580, -0.5, 0.0,
+      0.5001, -0.86597;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << -0.99980, 0.01732, -0.01,
-	       0.02, 0.86580, -0.5,
-	       0.0, -0.5001, -0.86597;
+  input_matrix << -0.99980, 0.01732, -0.01, 0.02, 0.86580, -0.5, 0.0, -0.5001,
+      -0.86597;
 
   double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
+      input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
   ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixWithXLongSideYShortSdie) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.0, -1.0, 0.0,
-		  1.0, 0.0, 0.0,
-		  0.0, 0.0, 1.0;
+  expected_matrix << 0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << 1.0, 0.0, 0.0,
-	       0.0, 1.0, 0.0,
-	       0.0, 0.0, 1.0;
+  input_matrix << 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0;
 
   double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
+      input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
 
   ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrixWithXLongSideYShortSide) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.01732, -0.99980, 0.01,
-		  0.86580, 0.02, 0.5,
-		  -0.5001, 0.0, 0.86597;
+  expected_matrix << 0.01732, -0.99980, 0.01, 0.86580, 0.02, 0.5, -0.5001, 0.0,
+      0.86597;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << 0.99980, 0.01732, 0.01,
-	       -0.02, 0.86580, 0.5,
-	       0.0, -0.5001, 0.86597;
+  input_matrix << 0.99980, 0.01732, 0.01, -0.02, 0.86580, 0.5, 0.0, -0.5001,
+      0.86597;
 
   double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
+      input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
 
   ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
-}  // surface_perception namespace
+}  // namespace surface_perception
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
