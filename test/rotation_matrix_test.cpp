@@ -4,23 +4,6 @@
 #include "pcl/ModelCoefficients.h"
 
 #include <gtest/gtest.h>
-namespace {
-void getHorizontalPlane(pcl::ModelCoefficients::Ptr model) {
-  model->values.resize(4);
-  model->values[0] = 0.0;
-  model->values[1] = 0.0;
-  model->values[2] = 1.0;
-  model->values[3] = 2.0;
-}
-
-void getTiltedPlane(pcl::ModelCoefficients::Ptr model) {
-  model->values.resize(4);
-  model->values[0] = 0.01;
-  model->values[1] = 0.5;
-  model->values[2] = 0.86597;
-  model->values[3] = 0.1;
-}
-}  // Anonymous namespace
 
 namespace surface_perception {
 // Consant dimensions
@@ -34,10 +17,10 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrix) {
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.000001));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
-TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate180DegreesAroundY) {
+TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate180DegreesAroundYAxis) {
   Eigen::Matrix3f expected_matrix;
   expected_matrix << 1.0, 0.0, 0.0,
 		  0.0, -1.0, 0.0,
@@ -51,96 +34,14 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate180DegreesAroundY) {
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
-TEST(TestStandardizeBoxOrientation, standard_axises_tilted_plane) {
-  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
-  getTiltedPlane(model);
-
+TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate45DegreesAroundZAxis) {
   Eigen::Matrix3f expected_matrix;
-
-  expected_matrix.col(0) = Eigen::Vector3f(1.0, 0.0, 0.0);
-  expected_matrix.col(2) = Eigen::Vector3f(model->values[0],
-		  model->values[1],
-		  model->values[2]);
-  expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
-
-  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
-
-  double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
-
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
-}
-
-TEST(TestStandardizeBoxOrientation, inverted_axises_tilted_plane) {
-  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
-  getTiltedPlane(model);
-
-  Eigen::Matrix3f expected_matrix;
-  expected_matrix.col(0) = Eigen::Vector3f(1.0, 0.0, 0.0);
-  expected_matrix.col(2) = Eigen::Vector3f(model->values[0],
-		  model->values[1],
-		  model->values[2]);
-  expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
-
-  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity() * -1.0;
-
-  double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
-
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
-}
-
-TEST(TestStandardizeBoxOrientation, swapping_x_y_basis_vectors_horizontal_plane) {
-  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
-  getHorizontalPlane(model);
-
-  Eigen::Matrix3f expected_matrix;
-  expected_matrix.col(0) = Eigen::Vector3f(0.0, 1.0, 0.0);
-  expected_matrix.col(2) = Eigen::Vector3f(model->values[0],
-		  model->values[1],
-		  model->values[2]);
-  expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
-
-  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
-
-  double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
-
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
-}
-
-TEST(TestStandardizeBoxOrientation, swapping_x_y_basis_vectors_tilted_plane) {
-  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
-  getTiltedPlane(model);
-
-  Eigen::Matrix3f expected_matrix;
-  expected_matrix.col(0) = Eigen::Vector3f(0.0, 1.0, 0.0);
-  expected_matrix.col(2) = Eigen::Vector3f(model->values[0],
-		  model->values[1],
-		  model->values[2]);
-  expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
-
-  Eigen::Matrix3f input_matrix = Eigen::Matrix3f::Identity();
-
-  double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
-
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
-}
-
-TEST(TestStandardizeBoxOrientation, tilted_45degrees_xy_direction_horizontal_plane) {
-  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
-  getHorizontalPlane(model);
-
-  Eigen::Matrix3f expected_matrix;
-  expected_matrix.col(0) = Eigen::Vector3f(0.70711, 0.70711, 0.0);
-  expected_matrix.col(2) = Eigen::Vector3f(model->values[0],
-		  model->values[1],
-		  model->values[2]);
-  expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
+  expected_matrix << 0.70711, -0.70711, 0.0,
+		  0.70711, 0.70711, 0.0,
+		  0.0, 0.0, 1.0;
 
   Eigen::Matrix3f input_matrix;
   input_matrix << 0.70711, -0.70711, 0.0,
@@ -150,41 +51,14 @@ TEST(TestStandardizeBoxOrientation, tilted_45degrees_xy_direction_horizontal_pla
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
-TEST(TestStandardizeBoxOrientation, tilted_45degrees_xy_direction_tilted_plane) {
-  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
-  getTiltedPlane(model);
-
+TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate135DegreesAroundZAxis) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix.col(0) = Eigen::Vector3f(0.70711, 0.70711, 0.0);
-  expected_matrix.col(2) = Eigen::Vector3f(model->values[0],
-		  model->values[1],
-		  model->values[2]);
-  expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
-
-  Eigen::Matrix3f input_matrix;
-  input_matrix << 0.70711, -0.70711, 0.0,
-	      0.70711, 0.70711, 0.0,
-	      0.0, 0.0, 1.0;
-
-  double x_dim, y_dim;
-  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
-
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
-}
-
-TEST(TestStandardizeBoxOrientation, tilted_135degrees_xy_direction_horizontal_plane) {
-  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
-  getHorizontalPlane(model);
-
-  Eigen::Matrix3f expected_matrix;
-  expected_matrix.col(0) = Eigen::Vector3f(0.70711, 0.70711, 0.0);
-  expected_matrix.col(2) = Eigen::Vector3f(model->values[0],
-		  model->values[1],
-		  model->values[2]);
-  expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
+  expected_matrix << 0.70711, -0.70711, 0.0,
+		  0.70711, 0.70711, 0.0,
+		  0.0, 0.0, 1.0;
 
   Eigen::Matrix3f input_matrix;
   input_matrix << -0.70711, 0.70711, 0.0,
@@ -194,29 +68,75 @@ TEST(TestStandardizeBoxOrientation, tilted_135degrees_xy_direction_horizontal_pl
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 
-TEST(TestStandardizeBoxOrientation, tilted_135degrees_xy_direction_tilted_plane) {
-  pcl::ModelCoefficients::Ptr model(new pcl::ModelCoefficients);
-  getTiltedPlane(model);
-
+TEST(TestStandardizeBoxOrientation, TiltedMatrix) {
   Eigen::Matrix3f expected_matrix;
-  expected_matrix.col(0) = Eigen::Vector3f(0.70711, 0.70711, 0.0);
-  expected_matrix.col(2) = Eigen::Vector3f(model->values[0],
-		  model->values[1],
-		  model->values[2]);
-  expected_matrix.col(1) = expected_matrix.col(2).cross(expected_matrix.col(0));
+  expected_matrix << 0.99980, 0.01732, 0.01,
+		  -0.02, 0.86580, 0.5,
+		  0.0, -0.5001, 0.86597;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << -0.70711, 0.70711, 0.0,
-	      -0.70711, 0.-70711, 0.0,
-	      0.0, 0.0, 1.0;
+  input_matrix << 0.99980, 0.01732, 0.01,
+	       -0.02, 0.86580, 0.5,
+	       0.0, -0.5001, 0.86597;
 
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.00001));
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+}
+
+TEST(TestStandardizeBoxOrientation, TiltedMatrixRotate180DegreesAroundYAxis) {
+  Eigen::Matrix3f expected_matrix;
+  expected_matrix << 0.99980, -0.01732, -0.01,
+		  -0.02, -0.86580, -0.5,
+		  0.0, 0.5001, -0.86597;
+
+  Eigen::Matrix3f input_matrix;
+  input_matrix << -0.99980, 0.01732, -0.01,
+	       0.02, 0.86580, -0.5,
+	       0.0, -0.5001, -0.86597;
+
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
+
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+}
+
+TEST(TestStandardizeBoxOrientation, IdentityMatrixWithXLongSideYShortSdie) {
+  Eigen::Matrix3f expected_matrix;
+  expected_matrix << 0.0, -1.0, 0.0,
+		  1.0, 0.0, 0.0,
+		  0.0, 0.0, 1.0;
+
+  Eigen::Matrix3f input_matrix;
+  input_matrix << 1.0, 0.0, 0.0,
+	       0.0, 1.0, 0.0,
+	       0.0, 0.0, 1.0;
+
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
+
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+}
+
+TEST(TestStandardizeBoxOrientation, TiltedMatrixWithXLongSideYShortSide) {
+  Eigen::Matrix3f expected_matrix;
+  expected_matrix << 0.01732, -0.99980, 0.01,
+		  0.86580, 0.02, 0.5,
+		  -0.5001, 0.0, 0.86597;
+
+  Eigen::Matrix3f input_matrix;
+  input_matrix << 0.99980, 0.01732, 0.01,
+	       -0.02, 0.86580, 0.5,
+	       0.0, -0.5001, 0.86597;
+
+  double x_dim, y_dim;
+  Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
+
+  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
 }
 }  // surface_perception namespace
 
