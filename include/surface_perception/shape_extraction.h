@@ -38,9 +38,12 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 ///
 /// The standardized box orientation is defined as the following:
 ///  1. If x dimension of the box must be smaller than or equal to y dimension.
-///   If not, x basis vector and y basis vector should be swapped.
+///   If not, the x basis vector and y basis vector should be swapped.
 ///  2. The angle between x-axis and the x basis vector of the rotation matrix
-///   is less than or equal to 90 degrees.
+///   is less than or equal to 90 degrees. If not, the new x basis vector will
+///   be calculated through the opposite direction of old x basis vector.
+///   Consequently, the new y basis vector will be computed using the cross
+///   product of the z basis vector and new x basis vector.
 ///  3. The z basis vector is the same as the normal vector of the plane where
 ///   the box will be constructed.
 ///
@@ -48,12 +51,12 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 ///  The z basis vector is assumed to be the same as the plane normal vector.
 /// \param[in] x_dimension The current x dimension of the box.
 /// \param[in] y_dimension The current y dimension of the box.
-/// \param[out] updated_x_dim If x basis vector and y basis vector are swapped,
-///  updated_x_dim will points to the value of y_dim. Otherwise, it points to
-///  value of x_dim.
-/// \param[out] updated_y_dim If y basis vector and x basis vector are swapped,
-///  updated_y_dim will points to the value of x_dim. Otherwise, it points to
-///  the value of y_dim.
+/// \param[out] updated_x_dim If the x basis vector and y basis vector are
+///  swapped, updated_x_dim will points to the value of y_dim. Otherwise, it
+///  points to the value of x_dim.
+/// \param[out] updated_y_dim If the y basis vector and x basis vector are
+///  swapped, updated_y_dim will points to the value of x_dim. Otherwise, it
+///  points to the value of y_dim.
 ///
 /// \return A rotation matrix with the standardized box orientation is returned,
 ///  based on the given rotation matrix and dimensions.
