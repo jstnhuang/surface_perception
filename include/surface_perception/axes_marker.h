@@ -5,29 +5,6 @@
 #include "visualization_msgs/MarkerArray.h"
 
 namespace surface_perception {
-/// \brief Generates a marker that represents three axes with colored strips.
-///
-/// \b Example usage:
-/// \code
-///   geometry_msgs::Pose pose;
-///   pose.position.x = pose.position.y = pose.position.z = 1.0;
-///   pose.orientation.x = pose.orientation.y = pose.orientation.z = 0.0;
-///   pose.orientation.w = 1.0;
-///   visualization_msgs::Marker axes_marker =
-///       surface_perception::GetAxesMarker("marker", pose, 1.0);
-///   axes_marker.header.frame_id = "base_link";
-/// \endcode
-///
-/// \param[in] name_space The name space of the marker to be created.
-/// \param[in] pose The pose of the marker to be created.
-/// \param[in] scale The width of the color strips that represents three axes.
-///
-/// \return A Marker that indicates three axes is returned, where x-axis is
-///  red, y-axis is green and z-axis is blue.
-visualization_msgs::Marker GetAxesMarker(const std::string& name_space,
-                                         geometry_msgs::Pose pose,
-                                         double scale);
-
 /// \brief This helper function generates a marker array where axes are
 ///  represented by three markers of colored cylinder bars.
 ///
