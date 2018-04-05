@@ -18,7 +18,9 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrix) {
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
       input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_EQ(kShortSide, x_dim);
+  EXPECT_EQ(kLongSide, y_dim);
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate180DegreesAroundYAxis) {
@@ -38,7 +40,9 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate180DegreesAroundYAxis) {
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
       input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_EQ(kShortSide, x_dim);
+  EXPECT_EQ(kLongSide, y_dim);
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate45DegreesAroundZAxis) {
@@ -58,7 +62,9 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate45DegreesAroundZAxis) {
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
       input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_EQ(kShortSide, x_dim);
+  EXPECT_EQ(kLongSide, y_dim);
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate135DegreesAroundZAxis) {
@@ -78,7 +84,9 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate135DegreesAroundZAxis) {
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
       input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_EQ(kShortSide, x_dim);
+  EXPECT_EQ(kLongSide, y_dim);
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrix) {
@@ -98,7 +106,9 @@ TEST(TestStandardizeBoxOrientation, TiltedMatrix) {
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
       input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_EQ(kShortSide, x_dim);
+  EXPECT_EQ(kLongSide, y_dim);
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrixRotate180DegreesAroundYAxis) {
@@ -118,7 +128,9 @@ TEST(TestStandardizeBoxOrientation, TiltedMatrixRotate180DegreesAroundYAxis) {
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
       input_matrix, kShortSide, kLongSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_EQ(kShortSide, x_dim);
+  EXPECT_EQ(kLongSide, y_dim);
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixWithXLongSideYShortSdie) {
@@ -138,7 +150,9 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixWithXLongSideYShortSdie) {
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
       input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_EQ(kShortSide, x_dim);
+  EXPECT_EQ(kLongSide, y_dim);
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrixWithXLongSideYShortSide) {
@@ -158,7 +172,9 @@ TEST(TestStandardizeBoxOrientation, TiltedMatrixWithXLongSideYShortSide) {
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
       input_matrix, kLongSide, kShortSide, &x_dim, &y_dim);
 
-  ASSERT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_TRUE(expected_matrix.isApprox(actual_matrix, 0.0001));
+  EXPECT_EQ(kShortSide, x_dim);
+  EXPECT_EQ(kLongSide, y_dim);
 }
 }  // namespace surface_perception
 
