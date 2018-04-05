@@ -52,10 +52,10 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 /// \param[in] x_dimension The current x dimension of the box.
 /// \param[in] y_dimension The current y dimension of the box.
 /// \param[out] updated_x_dim If the x basis vector and y basis vector are
-///  swapped, updated_x_dim will points to the value of y_dim. Otherwise, it
+///  swapped, updated_x_dim will point to the value of y_dim. Otherwise, it
 ///  points to the value of x_dim.
 /// \param[out] updated_y_dim If the y basis vector and x basis vector are
-///  swapped, updated_y_dim will points to the value of x_dim. Otherwise, it
+///  swapped, updated_y_dim will point to the value of x_dim. Otherwise, it
 ///  points to the value of y_dim.
 ///
 /// \return A rotation matrix with the standardized box orientation is returned,
