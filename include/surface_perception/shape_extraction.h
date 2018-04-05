@@ -37,15 +37,11 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
 /// \brief Returns a standardized orientation for a box.
 ///
 /// The standardized box orientation is defined as the following:
-///  1. If x dimension of the box must be smaller than or equal to y dimension.
-///   If not, the x basis vector and y basis vector should be swapped.
-///  2. The angle between x-axis and the x basis vector of the rotation matrix
-///   is less than or equal to 90 degrees. If not, the new x basis vector will
-///   be calculated through the opposite direction of old x basis vector.
-///   Consequently, the new y basis vector will be computed using the cross
-///   product of the z basis vector and new x basis vector.
-///  3. The z basis vector is the same as the normal vector of the plane where
-///   the box will be constructed.
+///  1. The x dimension of the box will be smaller than the y dimension of the
+///   box.
+///  2. The x-axis of the box will point in the positive x direction.
+///  3. The z-axis will point in the same direction as given, and the y-axis
+///   will be set according to the right hand rule.
 ///
 /// \param[in] rotaton_matrix The given rotation matrix of the box on a plane.
 ///  The z basis vector is assumed to be the same as the plane normal vector.
