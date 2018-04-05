@@ -22,11 +22,17 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrix) {
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate180DegreesAroundYAxis) {
+  // clang-format off
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0;
+  expected_matrix << 1.0, 0.0, 0.0,
+		  0.0, -1.0, 0.0,
+		  0.0, 0.0, -1.0;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << -1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0;
+  input_matrix << -1.0, 0.0, 0.0,
+	       0.0, 1.0, 0.0,
+	       0.0, 0.0, -1.0;
+  // clang-format on
 
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
@@ -36,12 +42,17 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate180DegreesAroundYAxis) {
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate45DegreesAroundZAxis) {
+  // clang-format off
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.70711, -0.70711, 0.0, 0.70711, 0.70711, 0.0, 0.0, 0.0,
-      1.0;
+  expected_matrix << 0.70711, -0.70711, 0.0,
+		  0.70711, 0.70711, 0.0,
+		  0.0, 0.0, 1.0;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << 0.70711, -0.70711, 0.0, 0.70711, 0.70711, 0.0, 0.0, 0.0, 1.0;
+  input_matrix << 0.70711, -0.70711, 0.0,
+	       0.70711, 0.70711, 0.0,
+	       0.0, 0.0, 1.0;
+  // clang-format on
 
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
@@ -51,13 +62,17 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate45DegreesAroundZAxis) {
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate135DegreesAroundZAxis) {
+  // clang-format off
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.70711, -0.70711, 0.0, 0.70711, 0.70711, 0.0, 0.0, 0.0,
-      1.0;
+  expected_matrix << 0.70711, -0.70711, 0.0,
+		  0.70711, 0.70711, 0.0,
+		  0.0, 0.0, 1.0;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << -0.70711, 0.70711, 0.0, -0.70711, 0. - 70711, 0.0, 0.0, 0.0,
-      1.0;
+  input_matrix << -0.70711, 0.70711, 0.0,
+	       -0.70711, -0.70711, 0.0,
+	       0.0, 0.0, 1.0;
+  // clang-format on
 
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
@@ -67,13 +82,17 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixRotate135DegreesAroundZAxis) {
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrix) {
+  // clang-format off
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.99980, 0.01732, 0.01, -0.02, 0.86580, 0.5, 0.0, -0.5001,
-      0.86597;
+  expected_matrix << 0.99980, 0.01732, 0.01,
+		  -0.02, 0.86580, 0.5,
+		  0.0, -0.5001, 0.86597;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << 0.99980, 0.01732, 0.01, -0.02, 0.86580, 0.5, 0.0, -0.5001,
-      0.86597;
+  input_matrix << 0.99980, 0.01732, 0.01,
+	       -0.02, 0.86580, 0.5,
+	       0.0, -0.5001, 0.86597;
+  // clang-format on
 
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
@@ -83,13 +102,17 @@ TEST(TestStandardizeBoxOrientation, TiltedMatrix) {
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrixRotate180DegreesAroundYAxis) {
+  // clang-format off
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.99980, -0.01732, -0.01, -0.02, -0.86580, -0.5, 0.0,
-      0.5001, -0.86597;
+  expected_matrix << 0.99980, -0.01732, -0.01,
+		  -0.02, -0.86580, -0.5,
+		  0.0, 0.5001, -0.86597;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << -0.99980, 0.01732, -0.01, 0.02, 0.86580, -0.5, 0.0, -0.5001,
-      -0.86597;
+  input_matrix << -0.99980, 0.01732, -0.01,
+	       0.02, 0.86580, -0.5,
+	       0.0, -0.5001, -0.86597;
+  // clang-format on
 
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
@@ -99,11 +122,17 @@ TEST(TestStandardizeBoxOrientation, TiltedMatrixRotate180DegreesAroundYAxis) {
 }
 
 TEST(TestStandardizeBoxOrientation, IdentityMatrixWithXLongSideYShortSdie) {
+  // clang-format off
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+  expected_matrix << 0.0, -1.0, 0.0,
+		  1.0, 0.0, 0.0,
+		  0.0, 0.0, 1.0;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0;
+  input_matrix << 1.0, 0.0, 0.0,
+	       0.0, 1.0, 0.0,
+	       0.0, 0.0, 1.0;
+  // clang-format on
 
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
@@ -113,13 +142,17 @@ TEST(TestStandardizeBoxOrientation, IdentityMatrixWithXLongSideYShortSdie) {
 }
 
 TEST(TestStandardizeBoxOrientation, TiltedMatrixWithXLongSideYShortSide) {
+  // clang-format off
   Eigen::Matrix3f expected_matrix;
-  expected_matrix << 0.01732, -0.99980, 0.01, 0.86580, 0.02, 0.5, -0.5001, 0.0,
-      0.86597;
+  expected_matrix << 0.01732, -0.99980, 0.01,
+		  0.86580, 0.02, 0.5,
+		  -0.5001, 0.0, 0.86597;
 
   Eigen::Matrix3f input_matrix;
-  input_matrix << 0.99980, 0.01732, 0.01, -0.02, 0.86580, 0.5, 0.0, -0.5001,
-      0.86597;
+  input_matrix << 0.99980, 0.01732, 0.01,
+	       -0.02, 0.86580, 0.5,
+	       0.0, -0.5001, 0.86597;
+  // clang-format on
 
   double x_dim, y_dim;
   Eigen::Matrix3f actual_matrix = StandardizeBoxOrientation(
