@@ -124,6 +124,18 @@ class Segmentation {
   void set_min_surface_exploration_iteration(
       int min_surface_exploration_iteration);
 
+  /// \brief Sets the maximum distance of inlier points considered to be part of
+  ///  a surface.
+  ///
+  /// As the surface exploration algorithm explores surfaces in the given point
+  /// cloud scene, the value of max_point_distance is used to compute the number
+  /// of inlier points for a surface. The number of surface inliers is then used
+  /// to determine the quality of the explored surfaces for the output.
+  ///
+  /// \param[in] max_point_distance The maximum distance threshold of surface
+  ///  inlier points. 
+  void set_max_point_distance(double max_point_distance);
+
   /// \brief Segments the scene.
   ///
   /// \param[out] surfaces The vector of SurfaceObjects to append to. This
@@ -142,6 +154,7 @@ class Segmentation {
   double horizontal_tolerance_degrees_;
   double margin_above_surface_;
   double cluster_distance_;
+  double max_point_distance_;
   int min_cluster_size_;
   int max_cluster_size_;
   int min_surface_size_;
@@ -153,7 +166,7 @@ class Segmentation {
 /// \param[in] cloud The point cloud to find a surface in, where positive z
 ///   points up.
 /// \param[in] indices The indices in the point cloud to find a surface in.
-/// \param[in] margin_above_surface The maximum distance between a plane and a
+/// \param[in] max_point_distance The maximum distance between a plane and a
 ///   point, in order to be considered as part of a surface.
 /// \param[in] horizontal_tolerance_degrees The tolerance, in degrees, for a
 ///   surface to be considered horizontal.
@@ -165,7 +178,7 @@ class Segmentation {
 ///
 /// \returns true if a surface was found, false otherwise.
 bool FindSurfaces(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
-                  pcl::PointIndicesPtr indices, double margin_above_surface,
+                  pcl::PointIndicesPtr indices, double max_point_distance,
                   double horizontal_tolerance_degrees, int min_surface_size,
                   int min_surface_exploration_iteration,
                   std::vector<Surface>* surfaces);
