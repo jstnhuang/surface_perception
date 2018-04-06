@@ -32,6 +32,7 @@ Segmentation::Segmentation()
       horizontal_tolerance_degrees_(10),
       margin_above_surface_(0.005),
       cluster_distance_(0.01),
+      max_point_distance_(0.005),
       min_cluster_size_(10),
       max_cluster_size_(10000),
       min_surface_size_(5000),
@@ -68,9 +69,13 @@ void Segmentation::set_min_surface_exploration_iteration(
     int min_surface_exploration_iteration) {
   min_surface_exploration_iteration_ = min_surface_exploration_iteration;
 }
+void Segmentation::set_max_point_distance(double max_point_distance) {
+  max_point_distance_ = max_point_distance;
+}
+
 bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
   std::vector<Surface> surface_vec;
-  bool success = FindSurfaces(cloud_, indices_, margin_above_surface_,
+  bool success = FindSurfaces(cloud_, indices_, max_point_distance_,
                               horizontal_tolerance_degrees_, min_surface_size_,
                               min_surface_exploration_iteration_, &surface_vec);
   if (!success) {
@@ -90,7 +95,7 @@ bool Segmentation::Segment(std::vector<SurfaceObjects>* surfaces) const {
 }
 
 bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
-                  double margin_above_surface,
+                  double max_point_distance,
                   double horizontal_tolerance_degrees, int min_surface_size,
                   int min_surface_exploration_iteration,
                   std::vector<Surface>* surfaces) {
@@ -102,7 +107,7 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   surfaceFinder.set_min_iteration(min_surface_exploration_iteration);
   surfaceFinder.set_surface_point_threshold(min_surface_size);
   surfaceFinder.set_angle_tolerance_degree(horizontal_tolerance_degrees);
-  surfaceFinder.set_max_point_distance(margin_above_surface);
+  surfaceFinder.set_max_point_distance(max_point_distance);
   surfaceFinder.ExploreSurfaces(&indices_vec, &coeffs_vec);
 
   if (indices_vec.size() == 0 || coeffs_vec.size() == 0) {
