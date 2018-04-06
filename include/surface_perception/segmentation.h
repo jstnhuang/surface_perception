@@ -133,7 +133,7 @@ class Segmentation {
   /// to determine the quality of the explored surfaces for the output.
   ///
   /// \param[in] max_point_distance The maximum distance threshold of surface
-  ///  inlier points. 
+  ///   inlier points.
   void set_max_point_distance(double max_point_distance);
 
   /// \brief Segments the scene.
