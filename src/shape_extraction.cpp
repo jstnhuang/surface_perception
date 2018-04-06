@@ -261,8 +261,8 @@ Eigen::Matrix3f StandardizeBoxOrientation(
   // Flip orientation if necessary to force x dimension < y dimension
   if (x_dim > y_dim) {
     Eigen::Vector3f y_axis = rotation_matrix.col(1);
-    // There are two choices for the new x axis. This chooses the one that
-    // is closer to the positive x direction of the data.
+    // There are two choices for the new x axis. This chooses the one that is
+    // closer to the positive x direction of the data.
     if (y_axis.x() < 0) {
       y_axis = -1 * rotation_matrix.col(1);
     }
@@ -285,8 +285,8 @@ Eigen::Matrix3f StandardizeBoxOrientation(
 
   // Check if the object is facing towards or perpendicular to the positive
   // x-axis. If not, the angle theta between x basis vector and x axis should be
-  // 90 < theta <= 180, which means the result of dot product of the two
-  // vectors would be negative.
+  // 90 < theta <= 180, which means the result of dot product of the two vectors
+  // would be negative.
   Eigen::Vector3f x_axis(1.0, 0.0, 0.0);
   if (output_matrix.col(0).dot(x_axis) < 0.0) {
     output_matrix.col(0) = output_matrix.col(0) * -1.0;
