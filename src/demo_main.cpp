@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle nh;
 
   ros::Publisher marker_pub =
-      nh.advertise<visualization_msgs::Marker>("surface_objects", 20);
+      nh.advertise<visualization_msgs::Marker>("surface_objects", 100);
   ros::Publisher cropped_input_pub = nh.advertise<sensor_msgs::PointCloud2>(
       "demo_cropped_input_cloud", 1, true);
 

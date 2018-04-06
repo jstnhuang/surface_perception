@@ -67,6 +67,12 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
 )
 
+add_library(surface_perception_axes_marker src/axes_marker.cpp)
+add_dependencies(surface_perception_axes_marker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(surface_perception_axes_marker
+  ${catkin_LIBRARIES}
+)
+
 add_library(surface_perception_segmentation src/segmentation.cpp)
 add_dependencies(surface_perception_segmentation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(surface_perception_segmentation
@@ -97,6 +103,7 @@ target_link_libraries(surface_perception_surface_history_recorder
 add_library(surface_perception_visualization src/visualization.cpp)
 add_dependencies(surface_perception_visualization ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(surface_perception_visualization
+  surface_perception_axes_marker
   ${catkin_LIBRARIES})
 
 add_executable(surface_perception_demo src/demo_main.cpp)
@@ -149,6 +156,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
+
+catkin_add_gtest(surface_perception_shape_extraction-test test/rotation_matrix_test.cpp)
+if(TARGET surface_perception_shape_extraction-test)
+  target_link_libraries(surface_perception_shape_extraction-test surface_perception_shape_extraction)
+endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)

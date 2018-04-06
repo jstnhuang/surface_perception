@@ -168,6 +168,10 @@ bool FitBox(const PointCloudC::Ptr& input,
     return false;
   }
 
+  // Record the best dimensions
+  double best_x_dim = 0.0;
+  double best_y_dim = 0.0;
+
   // Try fitting a rectangle
   for (size_t i = 0; i < hull.size() - 1; ++i) {
     // For each pair of hull points, determine the angle
@@ -226,40 +230,70 @@ bool FitBox(const PointCloudC::Ptr& input,
       pose->position.y = pose3f(1);
       pose->position.z = pose3f(2);
 
-      // Flip orientation if necessary to force x dimension < y dimension
-      double x_dim = x_max - x_min;
-      double y_dim = y_max - y_min;
-      if (x_dim > y_dim) {
-        Eigen::Vector3f y_axis = transformation.col(1);
-        // There are two choices for the new x axis. This chooses the one that
-        // is closer to the positive x direction of the data.
-        if (y_axis.x() < 0) {
-          y_axis = -1 * transformation.col(1);
-        }
-        transformation.col(0) = y_axis;
-        transformation.col(1) =
-            transformation.col(2).cross(transformation.col(0));
-      }
-
-      if (x_dim > y_dim) {
-        dimensions->x = (y_max - y_min);
-        dimensions->y = (x_max - x_min);
-      } else {
-        dimensions->x = (x_max - x_min);
-        dimensions->y = (y_max - y_min);
-      }
-      dimensions->z = height;
-
-      Eigen::Quaternionf q(transformation);
-      pose->orientation.x = q.x();
-      pose->orientation.y = q.y();
-      pose->orientation.z = q.z();
-      pose->orientation.w = q.w();
+      best_x_dim = x_max - x_min;
+      best_y_dim = y_max - y_min;
 
       min_volume = area * height;
     }
   }
 
+  Eigen::Matrix3f adjusted_transformation =
+      StandardizeBoxOrientation(transformation, best_x_dim, best_y_dim,
+                                &(dimensions->x), &(dimensions->y));
+
+  dimensions->z = height;
+
+  Eigen::Quaternionf q(adjusted_transformation);
+  pose->orientation.x = q.x();
+  pose->orientation.y = q.y();
+  pose->orientation.z = q.z();
+  pose->orientation.w = q.w();
+
   return true;
+}
+
+Eigen::Matrix3f StandardizeBoxOrientation(
+    const Eigen::Matrix3f& rotation_matrix, double x_dim, double y_dim,
+    double* updated_x_dim, double* updated_y_dim) {
+  // The matrix to be outputed
+  Eigen::Matrix3f output_matrix;
+
+  // Flip orientation if necessary to force x dimension < y dimension
+  if (x_dim > y_dim) {
+    Eigen::Vector3f y_axis = rotation_matrix.col(1);
+    // There are two choices for the new x axis. This chooses the one that is
+    // closer to the positive x direction of the data.
+    if (y_axis.x() < 0) {
+      y_axis = -1 * rotation_matrix.col(1);
+    }
+    output_matrix.col(0) = y_axis;
+    output_matrix.col(1) = rotation_matrix.col(2).cross(y_axis);
+  } else {
+    output_matrix.col(0) = rotation_matrix.col(0);
+    output_matrix.col(1) = rotation_matrix.col(1);
+  }
+  output_matrix.col(2) = rotation_matrix.col(2);
+
+  // Update the dimensions
+  if (x_dim > y_dim) {
+    *updated_x_dim = y_dim;
+    *updated_y_dim = x_dim;
+  } else {
+    *updated_x_dim = x_dim;
+    *updated_y_dim = y_dim;
+  }
+
+  // Check if the object is facing towards or perpendicular to the positive
+  // x-axis. If not, the angle theta between x basis vector and x axis should be
+  // 90 < theta <= 180, which means the result of dot product of the two vectors
+  // would be negative.
+  Eigen::Vector3f x_axis(1.0, 0.0, 0.0);
+  if (output_matrix.col(0).dot(x_axis) < 0.0) {
+    output_matrix.col(0) = output_matrix.col(0) * -1.0;
+
+    output_matrix.col(1) = output_matrix.col(2).cross(output_matrix.col(0));
+  }
+
+  return output_matrix;
 }
 }  // namespace surface_perception
