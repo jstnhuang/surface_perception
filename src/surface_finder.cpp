@@ -322,6 +322,8 @@ void SurfaceFinder::ExploreSurfaces(
     iteration++;
   }
 
+  ROS_INFO("Exploration ends at iteration %ld with %ld surfaces", iteration, ranking.size());
+
   //  Report surfaces
   if (ranking.size() > 0) {
     size_t amount = max_surface_amount_;
