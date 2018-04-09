@@ -223,6 +223,10 @@ void SurfaceFinder::ExploreSurfaces(
   }
   SortIndices();
 
+  size_t min_surface_trial = (log(1) - log(100)) /
+	  (log(1 - (double)surface_point_threshold_ / cloud_indices_->indices.size()));
+  ROS_INFO("The min trial for each surface is %ld", min_surface_trial);
+
   // Algorithm overview:
   // 1. Get a point randomly from cloud_->points, which is a vector<PointCloudC>
   // 2. Calculate the horizontal plane
@@ -233,7 +237,8 @@ void SurfaceFinder::ExploreSurfaces(
              cloud_indices_->indices.size(),
              cloud_indices_->header.frame_id.c_str());
   }
-  size_t num_surface = 0;
+  size_t iteration = 0;
+  size_t min_iteration = min_iteration_;
   size_t max_inlier_count = std::numeric_limits<size_t>::min();
   std::srand(unsigned(std::time(0)));
 
@@ -248,7 +253,7 @@ void SurfaceFinder::ExploreSurfaces(
   clock_t start = std::clock();
 
   // Sample min_iteration_ of horizontal surfaces
-  while (num_surface < min_iteration_ || ranking.size() < min_surface_amount_) {
+  while (iteration < min_iteration || ranking.size() < min_surface_amount_) {
     pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients);
     coeff->values.resize(4);
     pcl::PointIndices::Ptr indices(new pcl::PointIndices);
@@ -298,19 +303,23 @@ void SurfaceFinder::ExploreSurfaces(
         std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr> pr(
             coeff, indices);
         ranking[indices->indices.size()] = pr;
+
+	size_t old_min_iteration = min_iteration;
+	min_iteration = std::min(min_iteration, (max_surface_amount_ - ranking.size()) * min_surface_trial);
+
         if (debug) {
           if (pre_exist) {
             recorder.Update(old_indices_size, indices->indices.size(), cloud_,
-                            indices, num_surface);
+                            indices, iteration);
           } else {
             recorder.Record(indices->indices.size(), cloud_, indices,
-                            num_surface);
+                            iteration);
           }
         }
       }
     }
 
-    num_surface++;
+    iteration++;
   }
 
   //  Report surfaces
