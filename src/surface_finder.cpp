@@ -134,6 +134,14 @@ void sampleThreeNums(size_t rand_range, size_t nums_size, size_t rand_nums[]) {
     }
   }
 }
+
+/**
+ * This function estimates the number of trails needed to ensure
+ * max_failure_possibility.
+ */
+size_t getMinTrialSize(double possibility, double max_failure_possibility) {
+  return log(max_failure_possibility) / log(1.0 - possibility);
+}
 }  // Anonymous namespace
 
 namespace surface_perception {
@@ -223,8 +231,8 @@ void SurfaceFinder::ExploreSurfaces(
   }
   SortIndices();
 
-  size_t min_surface_trial = (log(1) - log(100)) /
-	  (log(1 - (double)surface_point_threshold_ / cloud_indices_->indices.size()));
+  size_t min_surface_trial = getMinTrialSize(
+      (double)surface_point_threshold_ / cloud_indices_->indices.size(), 0.01);
   ROS_INFO("The min trial for each surface is %ld", min_surface_trial);
 
   // Algorithm overview:
@@ -304,8 +312,9 @@ void SurfaceFinder::ExploreSurfaces(
             coeff, indices);
         ranking[indices->indices.size()] = pr;
 
-	size_t old_min_iteration = min_iteration;
-	min_iteration = std::min(min_iteration, (max_surface_amount_ - ranking.size()) * min_surface_trial);
+        min_iteration =
+            std::min(min_iteration, (max_surface_amount_ - ranking.size()) *
+                                        min_surface_trial);
 
         if (debug) {
           if (pre_exist) {
@@ -322,7 +331,8 @@ void SurfaceFinder::ExploreSurfaces(
     iteration++;
   }
 
-  ROS_INFO("Exploration ends at iteration %ld with %ld surfaces", iteration, ranking.size());
+  ROS_INFO("Exploration ends at iteration %ld with %ld surfaces", iteration,
+           ranking.size());
 
   //  Report surfaces
   if (ranking.size() > 0) {
@@ -396,7 +406,9 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
                                const pcl::ModelCoefficients::Ptr old_coeff_ptr,
                                pcl::PointIndices::Ptr new_indices_ptr,
                                pcl::ModelCoefficients::Ptr new_coeff_ptr) {
-  size_t iteration_each = std::max(min_iteration_ / 10, (size_t)10);  // Use 10% of minimum iterations
+  size_t min_surface_trial = getMinTrialSize(
+      (double)surface_point_threshold_ / cloud_indices_->indices.size(), 0.01);
+  size_t iteration_each = std::max(min_surface_trial, (size_t)10);
   size_t iteration = 0;
 
   size_t max_num_points = old_indices_ptr->indices.size();
