@@ -154,7 +154,7 @@ SurfaceFinder::SurfaceFinder()
       surface_point_threshold_(1000),
       min_surface_amount_(0),
       max_surface_amount_(10),
-      enforcing_min_iteration_(false),
+      using_iteration_reduction_(true),
       sorted_indices_() {}
 
 void SurfaceFinder::set_cloud(const PointCloudC::Ptr& cloud) { cloud_ = cloud; }
@@ -212,8 +212,8 @@ void SurfaceFinder::set_max_surface_amount(int max_surface_amount) {
   max_surface_amount_ = max_surface_amount;
 }
 
-void SurfaceFinder::set_enforcing_min_iteration(bool enforcing_min_iteration) {
-  enforcing_min_iteration_ = enforcing_min_iteration;
+void SurfaceFinder::set_using_iteration_reduction(bool using_iteration_reduction) {
+  using_iteration_reduction_ = using_iteration_reduction;
 }
 
 void SurfaceFinder::ExploreSurfaces(
@@ -317,7 +317,7 @@ void SurfaceFinder::ExploreSurfaces(
             coeff, indices);
         ranking[indices->indices.size()] = pr;
 
-	if (!enforcing_min_iteration_) {
+	if (using_iteration_reduction_) {
           min_iteration = std::min(min_iteration, (max_surface_amount_ - ranking.size()) * min_surface_trial);
 	}
 
