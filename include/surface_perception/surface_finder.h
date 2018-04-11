@@ -104,6 +104,22 @@ class SurfaceFinder {
   ///   can not be exceeded in the output of ExploreSurfaces.
   void set_max_surface_amount(int max_surface_amount);
 
+  /// \brief Set if the minimum number of iteration can be reduced or not.
+  ///
+  /// Let M be the maximum number of surface in the scene. Let number of points
+  /// in the point cloud scene is N. Let the minimum probability to not find
+  /// such a surface is 1%. To achieve such probability, the number of trial, T,
+  /// is calculated as:
+  ///
+  /// T = log(0.01) / log(1 - surface_point_threshold / N)
+  /// 
+  /// Since there are at most M such surfaces, the total number of trials
+  /// needed is estimated as M * T.
+  ///
+  /// \param[in] enforcing_min_iteration True if the minimum iteration will be
+  ///   enforced, or false, otherwise.
+  void set_enforcing_min_iteration(bool enforcing_min_iteration);
+
   /// \brief Find the horizontal surfaces in a point cloud scene
   ///
   /// The algorithm attempts to surfaces in a point cloud scene and terminate if
@@ -130,6 +146,7 @@ class SurfaceFinder {
   size_t surface_point_threshold_;
   size_t min_surface_amount_;
   size_t max_surface_amount_;
+  bool enforcing_min_iteration_;
   std::map<double, std::vector<int> > sorted_indices_;
   void SortIndices();
   void FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
