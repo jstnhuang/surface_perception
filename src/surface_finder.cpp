@@ -134,14 +134,6 @@ void sampleThreeNums(size_t rand_range, size_t nums_size, size_t rand_nums[]) {
     }
   }
 }
-
-/**
- * This function estimates the number of trails needed to ensure
- * max_failure_possibility.
- */
-size_t getMinTrialSize(double possibility, double max_failure_possibility) {
-  return log(max_failure_possibility) / log(1.0 - possibility);
-}
 }  // Anonymous namespace
 
 namespace surface_perception {
@@ -154,7 +146,6 @@ SurfaceFinder::SurfaceFinder()
       surface_point_threshold_(1000),
       min_surface_amount_(0),
       max_surface_amount_(10),
-      using_iteration_reduction_(true),
       sorted_indices_() {}
 
 void SurfaceFinder::set_cloud(const PointCloudC::Ptr& cloud) { cloud_ = cloud; }
@@ -212,10 +203,6 @@ void SurfaceFinder::set_max_surface_amount(int max_surface_amount) {
   max_surface_amount_ = max_surface_amount;
 }
 
-void SurfaceFinder::set_using_iteration_reduction(bool using_iteration_reduction) {
-  using_iteration_reduction_ = using_iteration_reduction;
-}
-
 void SurfaceFinder::ExploreSurfaces(
     std::vector<pcl::PointIndices::Ptr>* indices_vec,
     std::vector<pcl::ModelCoefficients>* coeffs_vec) {
@@ -236,10 +223,6 @@ void SurfaceFinder::ExploreSurfaces(
   }
   SortIndices();
 
-  size_t min_surface_trial = getMinTrialSize(
-      (double)surface_point_threshold_ / cloud_indices_->indices.size(), 0.01);
-  ROS_INFO("The min trial for each surface is %ld", min_surface_trial);
-
   // Algorithm overview:
   // 1. Get a point randomly from cloud_->points, which is a vector<PointCloudC>
   // 2. Calculate the horizontal plane
@@ -250,8 +233,7 @@ void SurfaceFinder::ExploreSurfaces(
              cloud_indices_->indices.size(),
              cloud_indices_->header.frame_id.c_str());
   }
-  size_t iteration = 0;
-  size_t min_iteration = min_iteration_;
+  size_t num_surface = 0;
   size_t max_inlier_count = std::numeric_limits<size_t>::min();
   std::srand(unsigned(std::time(0)));
 
@@ -266,7 +248,7 @@ void SurfaceFinder::ExploreSurfaces(
   clock_t start = std::clock();
 
   // Sample min_iteration_ of horizontal surfaces
-  while (iteration < min_iteration || ranking.size() < min_surface_amount_) {
+  while (num_surface < min_iteration_ || ranking.size() < min_surface_amount_) {
     pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients);
     coeff->values.resize(4);
     pcl::PointIndices::Ptr indices(new pcl::PointIndices);
@@ -316,28 +298,20 @@ void SurfaceFinder::ExploreSurfaces(
         std::pair<pcl::ModelCoefficients::Ptr, pcl::PointIndices::Ptr> pr(
             coeff, indices);
         ranking[indices->indices.size()] = pr;
-
-	if (using_iteration_reduction_) {
-          min_iteration = std::min(min_iteration, (max_surface_amount_ - ranking.size()) * min_surface_trial);
-	}
-
         if (debug) {
           if (pre_exist) {
             recorder.Update(old_indices_size, indices->indices.size(), cloud_,
-                            indices, iteration);
+                            indices, num_surface);
           } else {
             recorder.Record(indices->indices.size(), cloud_, indices,
-                            iteration);
+                            num_surface);
           }
         }
       }
     }
 
-    iteration++;
+    num_surface++;
   }
-
-  ROS_INFO("Exploration ends at iteration %ld with %ld surfaces", iteration,
-           ranking.size());
 
   //  Report surfaces
   if (ranking.size() > 0) {
@@ -411,9 +385,7 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
                                const pcl::ModelCoefficients::Ptr old_coeff_ptr,
                                pcl::PointIndices::Ptr new_indices_ptr,
                                pcl::ModelCoefficients::Ptr new_coeff_ptr) {
-  size_t min_surface_trial = getMinTrialSize(
-      (double)surface_point_threshold_ / cloud_indices_->indices.size(), 0.01);
-  size_t iteration_each = std::max(min_surface_trial, (size_t)10);
+  size_t iteration_each = std::max(min_iteration_ / 10, (size_t)10);  // Use 10% of minimum iterations
   size_t iteration = 0;
 
   size_t max_num_points = old_indices_ptr->indices.size();
@@ -465,5 +437,9 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
     iteration++;
   }
   return;
+}
+
+int EstimateMinIteration(int cloud_size, int max_surface_amount, int min_surface_size, double probability_threshold) {
+  return max_surface_amount * log(probability_threshold) / log(1.0 - min_surface_size / cloud_size);
 }
 }  // namespace surface_perception

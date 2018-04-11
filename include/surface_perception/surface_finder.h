@@ -104,23 +104,6 @@ class SurfaceFinder {
   ///   can not be exceeded in the output of ExploreSurfaces.
   void set_max_surface_amount(int max_surface_amount);
 
-  /// \brief Set if the minimum number of iteration can be reduced or not.
-  ///
-  /// Let M be the number of remaining surface to be found. Let number of points
-  /// in the point cloud scene is N. Let the minimum probability to not find
-  /// such a surface is 1%. To achieve such probability, the number of trial, T,
-  /// is calculated as:
-  ///
-  /// T = log(0.01) / log(1 - surface_point_threshold / N)
-  /// 
-  /// Since there are still M such surfaces to be explored, the total number of
-  /// trials needed is estimated as M * T. When the iteration reduction is used,
-  /// the minimum iteration is capped to M * T or lower.
-  ///
-  /// \param[in] using_iteration_reduction True if iteration reduction will be
-  ///   used, or false, otherwise.
-  void set_using_iteration_reduction(bool using_iteration_reduction);
-
   /// \brief Find the horizontal surfaces in a point cloud scene
   ///
   /// The algorithm attempts to surfaces in a point cloud scene and terminate if
@@ -155,6 +138,26 @@ class SurfaceFinder {
                   pcl::PointIndices::Ptr new_indices_ptr,
                   pcl::ModelCoefficients::Ptr new_coeff_ptr);
 };
+
+/// \brief Estimate the minimum number of iteration for the surface exploration
+///   algorithm.
+///
+/// To achieve such probability, the number of trial, T, is calculated as:
+///
+/// T = log(probability_threshold) / log(1 - min_surface_size / cloud_size)
+///
+/// Since there are max_surface_amount such surface, the total number of trials
+/// needed is estimated as max_surface_amount * T.
+///
+/// \param[in] cloud_size The number of points in the point cloud.
+/// \param[in] max_surface_amount The maximum number of surfaces in the point
+///   cloud.
+/// \param[in] min_surface_size The minimum number of points in a surface.
+/// \param[in] probability_threshold The maximum probability of failure.
+///
+/// \return Report the estimated number of minimum iterations.
+int EstimateMinIteration(int cloud_size, int max_surface_amount,
+                         int min_surface_size, double probability_threshold);
 }  // namespace surface_perception
 
 #endif  // _SURFACE_PERCEPTION_SURFACE_FINDER_H_

@@ -108,7 +108,6 @@ bool FindSurfaces(PointCloudC::Ptr cloud, pcl::PointIndices::Ptr indices,
   surfaceFinder.set_surface_point_threshold(min_surface_size);
   surfaceFinder.set_angle_tolerance_degree(horizontal_tolerance_degrees);
   surfaceFinder.set_max_point_distance(max_point_distance);
-  surfaceFinder.set_using_iteration_reduction(true);
   surfaceFinder.ExploreSurfaces(&indices_vec, &coeffs_vec);
 
   if (indices_vec.size() == 0 || coeffs_vec.size() == 0) {
