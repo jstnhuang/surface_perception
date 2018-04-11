@@ -385,7 +385,8 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
                                const pcl::ModelCoefficients::Ptr old_coeff_ptr,
                                pcl::PointIndices::Ptr new_indices_ptr,
                                pcl::ModelCoefficients::Ptr new_coeff_ptr) {
-  size_t iteration_each = std::max(min_iteration_ / 10, (size_t)10);  // Use 10% of minimum iterations
+  size_t iteration_each = std::max(
+      min_iteration_ / 10, (size_t)10);  // Use 10% of minimum iterations
   size_t iteration = 0;
 
   size_t max_num_points = old_indices_ptr->indices.size();
@@ -439,7 +440,9 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
   return;
 }
 
-int EstimateMinIteration(int cloud_size, int max_surface_amount, int min_surface_size, double probability_threshold) {
-  return max_surface_amount * log(probability_threshold) / log(1.0 - min_surface_size / cloud_size);
+int EstimateMinIteration(int cloud_size, int max_surface_amount,
+                         int min_surface_size, double probability_threshold) {
+  return max_surface_amount * log(probability_threshold) /
+         log(1.0 - (double)min_surface_size / cloud_size);
 }
 }  // namespace surface_perception
