@@ -109,9 +109,8 @@ bool FitBox(const PointCloudC::Ptr& input,
             const pcl::PointIndices::Ptr& indices,
             const pcl::ModelCoefficients::Ptr& model, geometry_msgs::Pose* pose,
             geometry_msgs::Vector3* dimensions) {
-  double min_volume = std::numeric_limits<double>::max();  // the minimum volume
-                                                           // shape found thus
-                                                           // far.
+  // The minimum volume shape found thus far.
+  double min_volume = std::numeric_limits<double>::max();
   Eigen::Matrix3f transformation;  // the transformation for the best-fit shape
 
   // Compute z height as maximum distance from planes
@@ -173,7 +172,7 @@ bool FitBox(const PointCloudC::Ptr& input,
   double best_y_dim = 0.0;
 
   // Try fitting a rectangle
-  for (size_t i = 0; i < hull.size() - 1; ++i) {
+  for (size_t i = 0; i + 1 < hull.size(); ++i) {
     // For each pair of hull points, determine the angle
     double rise = hull[i + 1].y - hull[i].y;
     double run = hull[i + 1].x - hull[i].x;
@@ -207,9 +206,9 @@ bool FitBox(const PointCloudC::Ptr& input,
 
     // Compute min/max
     double x_min = std::numeric_limits<double>::max();
-    double x_max = std::numeric_limits<double>::min();
+    double x_max = -std::numeric_limits<double>::max();
     double y_min = std::numeric_limits<double>::max();
-    double y_max = std::numeric_limits<double>::min();
+    double y_max = -std::numeric_limits<double>::max();
     for (size_t j = 0; j < projected_cloud.size(); ++j) {
       if (projected_cloud[j].x < x_min) x_min = projected_cloud[j].x;
       if (projected_cloud[j].x > x_max) x_max = projected_cloud[j].x;
@@ -220,6 +219,7 @@ bool FitBox(const PointCloudC::Ptr& input,
 
     // Is this the best estimate?
     double area = (x_max - x_min) * (y_max - y_min);
+
     if (area * height < min_volume) {
       transformation = inv_plane_rotation * inv_rotation;
 
