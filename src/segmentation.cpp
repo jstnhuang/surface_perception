@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Eigen/Eigen"
+#include "eigen_conversions/eigen_msg.h"
 #include "pcl/common/angles.h"
 #include "pcl/sample_consensus/method_types.h"
 #include "pcl/sample_consensus/model_types.h"
@@ -234,8 +235,8 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
       object.indices.reset(new pcl::PointIndices(object_indices[j]));
       object.pose_stamped.header.frame_id = cloud->header.frame_id;
 
-      if (FitBox(cloud, object.indices, surfaces[i].coefficients,
-                 &object.pose_stamped.pose, &object.dimensions)) {
+      if (FitBoxOnSurface(cloud, object.indices, surfaces[i],
+                          &object.pose_stamped.pose, &object.dimensions)) {
         surface_objects.objects.push_back(object);
       }
     }

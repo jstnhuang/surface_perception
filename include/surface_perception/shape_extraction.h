@@ -8,6 +8,8 @@
 #include "pcl/point_cloud.h"
 #include "pcl/point_types.h"
 
+#include "surface_perception/surface.h"
+
 namespace surface_perception {
 /// \brief Fits an oriented bounding box around a given point cloud representing
 ///   an object or a surface.
@@ -33,6 +35,29 @@ bool FitBox(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
             const pcl::PointIndicesPtr& indices,
             const pcl::ModelCoefficients::Ptr& model, geometry_msgs::Pose* pose,
             geometry_msgs::Vector3* dimensions);
+
+/// \brief Fits an oriented bounding box around a given point cloud representing
+///   an object resting on a surface.
+///
+/// Note: this algorithm is adapted from the <a
+/// href="http://wiki.ros.org/simple_grasping">simple_grasping</a> package.
+///
+/// \param[in] input The input point cloud to fit the box around.
+/// \param[in] indices The indices in the input point cloud to use.
+/// \param[in] surface The surface that the object is resting on.
+/// \param[out] pose The pose representing the center of the box. The z
+///   direction points "up" relative to the surface. The x and y directions are
+///   aligned with the fitted box, with the x direction pointing toward the
+///   shorter side of the box.
+/// \param[out] dimensions The dimensions of the oriented bounding box. x, y,
+///   and z correspond to the directions of the pose.
+///
+/// \returns reports true when a bounding box can be constructed for the object,
+///   or false if the construction fails.
+bool FitBoxOnSurface(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
+                     const pcl::PointIndicesPtr& indices,
+                     const Surface& surface, geometry_msgs::Pose* pose,
+                     geometry_msgs::Vector3* dimensions);
 
 /// \brief Returns a standardized orientation for a box.
 ///

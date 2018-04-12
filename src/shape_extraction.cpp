@@ -13,6 +13,7 @@
 #include "ros/ros.h"
 
 #include "pcl/features/normal_3d.h"
+#include "surface_perception/surface.h"
 #include "surface_perception/typedefs.h"
 
 namespace {
@@ -248,6 +249,33 @@ bool FitBox(const PointCloudC::Ptr& input,
   pose->orientation.y = q.y();
   pose->orientation.z = q.z();
   pose->orientation.w = q.w();
+
+  return true;
+}
+
+bool FitBoxOnSurface(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input,
+                     const pcl::PointIndicesPtr& indices,
+                     const Surface& surface, geometry_msgs::Pose* pose,
+                     geometry_msgs::Vector3* dimensions) {
+  bool success = FitBox(input, indices, surface.coefficients, pose, dimensions);
+  if (!success) {
+    return false;
+  }
+
+  // The box intersects with the surface. We adjust its dimensions and pose so
+  // that it is resting on the surface.
+  dimensions->z -= surface.dimensions.z / 2;
+
+  Eigen::Quaternionf q;
+  q.w() = pose->orientation.w;
+  q.x() = pose->orientation.x;
+  q.y() = pose->orientation.y;
+  q.z() = pose->orientation.z;
+  Eigen::Matrix3f mat(q);
+  Eigen::Vector3f up = mat.col(2) * surface.dimensions.z / 4;
+  pose->position.x += up.x();
+  pose->position.y += up.y();
+  pose->position.z += up.z();
 
   return true;
 }
