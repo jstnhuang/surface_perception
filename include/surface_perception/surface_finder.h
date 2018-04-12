@@ -130,6 +130,7 @@ class SurfaceFinder {
   size_t surface_point_threshold_;
   size_t min_surface_amount_;
   size_t max_surface_amount_;
+  bool using_iteration_reduction_;
   std::map<double, std::vector<int> > sorted_indices_;
   void SortIndices();
   void FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
@@ -137,6 +138,26 @@ class SurfaceFinder {
                   pcl::PointIndices::Ptr new_indices_ptr,
                   pcl::ModelCoefficients::Ptr new_coeff_ptr);
 };
+
+/// \brief Estimate the minimum number of iteration for the surface exploration
+///   algorithm.
+///
+/// To achieve such probability, the number of trial, T, is calculated as:
+///
+/// T = log(probability_threshold) / log(1 - min_surface_size / cloud_size)
+///
+/// Since there are max_surface_amount such surface, the total number of trials
+/// needed is estimated as max_surface_amount * T.
+///
+/// \param[in] cloud_size The number of points in the point cloud.
+/// \param[in] max_surface_amount The maximum number of surfaces in the point
+///   cloud.
+/// \param[in] min_surface_size The minimum number of points in a surface.
+/// \param[in] probability_threshold The maximum probability of failure.
+///
+/// \return Report the estimated number of minimum iterations.
+int EstimateMinIteration(int cloud_size, int max_surface_amount,
+                         int min_surface_size, double probability_threshold);
 }  // namespace surface_perception
 
 #endif  // _SURFACE_PERCEPTION_SURFACE_FINDER_H_
