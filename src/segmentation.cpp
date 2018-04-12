@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Eigen/Eigen"
+#include "eigen_conversions/eigen_msg.h"
 #include "pcl/common/angles.h"
 #include "pcl/sample_consensus/method_types.h"
 #include "pcl/sample_consensus/model_types.h"
@@ -200,43 +201,36 @@ bool FindObjectsOnSurfaces(PointCloudC::Ptr cloud, pcl::PointIndicesPtr indices,
                      surfaces[i + 1].dimensions.z / 2.0;
     }
 
-    bool success = GetSceneAboveSurface(
-        cloud, indices, *surfaces[i].coefficients, margin_above_surface,
-        height_limit, above_surface_indices);
-    if (!success) {
-      ROS_WARN(
-          "Warning: extraction of indices above a horizontal surface failed");
-      ROS_WARN("Surface %ld at (%f, %f, %f) with dimesions (%f, %f, %f)", i,
-               surfaces[i].pose_stamped.pose.position.x,
-               surfaces[i].pose_stamped.pose.position.y,
-               surfaces[i].pose_stamped.pose.position.z,
-               surfaces[i].dimensions.x, surfaces[i].dimensions.y,
-               surfaces[i].dimensions.z);
-    }
+    GetSceneAboveSurface(cloud, indices, *surfaces[i].coefficients,
+                         margin_above_surface, height_limit,
+                         above_surface_indices);
     above_surface_indices_vec.push_back(above_surface_indices);
   }
 
   for (size_t i = 0; i < above_surface_indices_vec.size(); i++) {
-    std::vector<pcl::PointIndices> object_indices;
-    pcl::EuclideanClusterExtraction<PointC> euclid;
-    euclid.setInputCloud(cloud);
-    euclid.setIndices(above_surface_indices_vec[i]);
-    euclid.setClusterTolerance(cluster_distance);
-    euclid.setMinClusterSize(min_cluster_size);
-    euclid.setMaxClusterSize(max_cluster_size);
-    euclid.extract(object_indices);
-
     SurfaceObjects surface_objects;
     surface_objects.surface = surfaces[i];
-    for (size_t j = 0; j < object_indices.size(); j++) {
-      Object object;
-      object.cloud = cloud;
-      object.indices.reset(new pcl::PointIndices(object_indices[j]));
-      object.pose_stamped.header.frame_id = cloud->header.frame_id;
 
-      if (FitBox(cloud, object.indices, surfaces[i].coefficients,
-                 &object.pose_stamped.pose, &object.dimensions)) {
-        surface_objects.objects.push_back(object);
+    if (above_surface_indices_vec[i]->indices.size() > 0) {
+      pcl::EuclideanClusterExtraction<PointC> euclid;
+      euclid.setInputCloud(cloud);
+      euclid.setIndices(above_surface_indices_vec[i]);
+      euclid.setClusterTolerance(cluster_distance);
+      euclid.setMinClusterSize(min_cluster_size);
+      euclid.setMaxClusterSize(max_cluster_size);
+      std::vector<pcl::PointIndices> object_indices;
+      euclid.extract(object_indices);
+
+      for (size_t j = 0; j < object_indices.size(); j++) {
+        Object object;
+        object.cloud = cloud;
+        object.indices.reset(new pcl::PointIndices(object_indices[j]));
+        object.pose_stamped.header.frame_id = cloud->header.frame_id;
+
+        if (FitBoxOnSurface(cloud, object.indices, surfaces[i],
+                            &object.pose_stamped.pose, &object.dimensions)) {
+          surface_objects.objects.push_back(object);
+        }
       }
     }
     surfaces_objects_vec->push_back(surface_objects);

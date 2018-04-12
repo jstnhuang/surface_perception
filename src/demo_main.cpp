@@ -8,7 +8,6 @@
 #include "ros/ros.h"
 #include "sensor_msgs/PointCloud2.h"
 #include "surface_perception/segmentation.h"
-#include "surface_perception/surface_finder.h"
 #include "surface_perception/surface_objects.h"
 #include "surface_perception/typedefs.h"
 #include "surface_perception/visualization.h"
@@ -105,9 +104,6 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   int min_surface_exploration_iteration;
   ros::param::param("min_surface_exploration_iteration",
                     min_surface_exploration_iteration, 1000);
-  bool using_iteration_reduction;
-  ros::param::param("using_iteration_reduction", using_iteration_reduction,
-                    true);
 
   surface_perception::Segmentation seg;
   seg.set_input_cloud(pcl_cloud);
@@ -119,12 +115,6 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   seg.set_min_cluster_size(min_cluster_size);
   seg.set_max_cluster_size(max_cluster_size);
   seg.set_min_surface_size(min_surface_size);
-
-  if (using_iteration_reduction) {
-    min_surface_exploration_iteration =
-        surface_perception::EstimateMinIteration(point_indices->indices.size(),
-                                                 10, min_surface_size, 0.01);
-  }
   seg.set_min_surface_exploration_iteration(min_surface_exploration_iteration);
 
   std::vector<SurfaceObjects> surface_objects;

@@ -9,6 +9,7 @@ project(surface_perception)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
+  eigen_conversions
   geometry_msgs
   pcl_conversions
   roscpp
@@ -45,6 +46,7 @@ catkin_package(
     surface_perception_surface_history_recorder
     surface_perception_visualization
   CATKIN_DEPENDS
+    eigen_conversions
     geometry_msgs
     pcl_conversions
     roscpp
