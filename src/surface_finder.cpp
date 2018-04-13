@@ -440,12 +440,6 @@ void SurfaceFinder::FitSurface(const pcl::PointIndices::Ptr old_indices_ptr,
   return;
 }
 
-int EstimateMinIteration(int cloud_size, int max_surface_amount,
-                         int min_surface_size, double probability_threshold) {
-  return max_surface_amount * log(probability_threshold) /
-         log(1.0 - (double)min_surface_size / cloud_size);
-}
-
 void EstimateParameters(int cloud_size, int min_surface_size,
                         double probability_threshold, int* max_surface_amount,
                         int* min_iteration) {

@@ -139,11 +139,10 @@ class SurfaceFinder {
                   pcl::ModelCoefficients::Ptr new_coeff_ptr);
 };
 
-/// \brief Estimate the minimum number of iteration for the surface exploration
-///   algorithm.
+/// \brief Estimate the maximum number of surfaces and the minimum number of
+///   iteration for the surface exploration algorithm.
 ///
 /// To achieve such probability, the number of trial, T, is calculated as:
-///
 /// T = log(probability_threshold) / log(1 - min_surface_size / cloud_size)
 ///
 /// Since there are max_surface_amount such surface, the total number of trials
@@ -156,8 +155,9 @@ class SurfaceFinder {
 /// \param[in] probability_threshold The maximum probability of failure.
 ///
 /// \return Report the estimated number of minimum iterations.
-int EstimateMinIteration(int cloud_size, int max_surface_amount,
-                         int min_surface_size, double probability_threshold);
+void EstimateParameters(int cloud_size, int min_surface_size,
+                        double probability_threshold, int* max_surface_amount,
+                        int* min_iteration);
 }  // namespace surface_perception
 
 #endif  // _SURFACE_PERCEPTION_SURFACE_FINDER_H_

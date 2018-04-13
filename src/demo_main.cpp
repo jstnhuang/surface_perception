@@ -105,8 +105,8 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   int min_surface_exploration_iteration;
   ros::param::param("min_surface_exploration_iteration",
                     min_surface_exploration_iteration, 1000);
-  bool using_iteration_reduction;
-  ros::param::param("using_iteration_reduction", using_iteration_reduction,
+  bool using_parameter_estimation;
+  ros::param::param("using_parameter_estimation", using_parameter_estimation,
                     true);
 
   surface_perception::Segmentation seg;
@@ -120,10 +120,11 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
   seg.set_max_cluster_size(max_cluster_size);
   seg.set_min_surface_size(min_surface_size);
 
-  if (using_iteration_reduction) {
-    min_surface_exploration_iteration =
-        surface_perception::EstimateMinIteration(point_indices->indices.size(),
-                                                 10, min_surface_size, 0.01);
+  if (using_parameter_estimation) {
+    int max_surface_amount;
+    surface_perception::EstimateParameters(
+        point_indices->indices.size(), min_surface_size, 0.01,
+        &max_surface_amount, &min_surface_exploration_iteration);
   }
   seg.set_min_surface_exploration_iteration(min_surface_exploration_iteration);
 
