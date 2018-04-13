@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -122,9 +123,13 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
   if (using_parameter_estimation) {
     int max_surface_amount;
+    int test_min_surface_exploration_iteration;
     surface_perception::EstimateParameters(
         point_indices->indices.size(), min_surface_size, 0.01,
-        &max_surface_amount, &min_surface_exploration_iteration);
+        &max_surface_amount, &test_min_surface_exploration_iteration);
+    min_surface_exploration_iteration =
+        std::min(min_surface_exploration_iteration,
+                 test_min_surface_exploration_iteration);
   }
   seg.set_min_surface_exploration_iteration(min_surface_exploration_iteration);
 
