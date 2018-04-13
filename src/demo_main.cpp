@@ -137,8 +137,9 @@ void Demo::Callback(const sensor_msgs::PointCloud2ConstPtr& cloud) {
     for (size_t i = 0; i < surface_objects.size(); i++) {
       object_count += surface_objects[i].objects.size();
     }
-    ROS_INFO("Found %ld surfaces with %ld objects", surface_objects.size(),
-             object_count);
+    ROS_INFO("Found %ld surfaces with %ld objects using %d iterations",
+             surface_objects.size(), object_count,
+             min_surface_exploration_iteration);
   }
 
   viz_.Hide();
