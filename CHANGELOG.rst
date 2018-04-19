@@ -2,6 +2,20 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Removed warning message for surfaces with no objects.
+* Fixed objects intersecting with surface.
+* Fixed bugs with shape extraction.
+* Decouple the usage of margin_above_surface and max_point_distance
+* Fixed bug with standardizing object orientation (`#9 <https://github.com/jstnhuang/surface_perception/issues/9>`_)
+  * Pulled code to standardize object orientations into a separate function
+  * Fixed a bug with this function
+  * Added tests
+  * Added a visualization of the object orientations
+* Updated Doxygen mainpage.
+* Contributors: Justin Huang, Yu-Tang Peng
+
 1.0.1 (2018-03-06)
 ------------------
 * Allowed surfaces with no object on them.
