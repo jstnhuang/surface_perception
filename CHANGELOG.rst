@@ -2,8 +2,8 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.2 (2018-04-18)
+------------------
 * Removed warning message for surfaces with no objects.
 * Fixed objects intersecting with surface.
 * Fixed bugs with shape extraction.
