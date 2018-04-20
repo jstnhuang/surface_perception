@@ -11,7 +11,7 @@
 namespace surface_perception {
 visualization_msgs::MarkerArray GetAxesMarkerArray(
     const std::string& name_space, const std::string& frame_id,
-    geometry_msgs::Pose pose, double scale) {
+    const geometry_msgs::Pose& pose, double scale) {
   visualization_msgs::MarkerArray res;
   Eigen::Matrix3f rotation_matrix =
       Eigen::Quaternionf(pose.orientation.w, pose.orientation.x,
