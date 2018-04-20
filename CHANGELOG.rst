@@ -2,8 +2,8 @@
 Changelog for package surface_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2018-04-20)
+------------------
 * Changed pose to be a const ref.
 * Exported axes marker library.
 * Contributors: Justin Huang
