@@ -95,12 +95,8 @@ visualization_msgs::MarkerArray GetAxesMarkerArray(
   z_axis.scale.x = z_axis.scale.y = std::max(scale * 0.1, 0.01);
   z_axis.scale.z = scale;
 
-  // Z axis orientation, which has the same rotation_matrix from the given pose.
-  Eigen::Quaternionf z_quaternion(rotation_matrix);
-  z_axis.pose.orientation.x = z_quaternion.x();
-  z_axis.pose.orientation.y = z_quaternion.y();
-  z_axis.pose.orientation.z = z_quaternion.z();
-  z_axis.pose.orientation.w = z_quaternion.w();
+  // Z axis orientation, which has the same orientation as the given pose.
+  z_axis.pose.orientation = pose.orientation;
 
   // Z axis position shifting
   z_axis.pose.position = pose.position;
