@@ -29,7 +29,7 @@ namespace surface_perception {
 ///   a red cylinder, y-axis is a green cylinder and z-axis is a blue cylinder.
 visualization_msgs::MarkerArray GetAxesMarkerArray(
     const std::string& name_space, const std::string& frame_id,
-    geometry_msgs::Pose pose, double scale);
+    const geometry_msgs::Pose& pose, double scale);
 }  // namespace surface_perception
 
 #endif  // _SURFACE_PERCEPTION_AXES_MARKER_H_

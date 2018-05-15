@@ -11,7 +11,7 @@
 namespace surface_perception {
 visualization_msgs::MarkerArray GetAxesMarkerArray(
     const std::string& name_space, const std::string& frame_id,
-    geometry_msgs::Pose pose, double scale) {
+    const geometry_msgs::Pose& pose, double scale) {
   visualization_msgs::MarkerArray res;
   Eigen::Matrix3f rotation_matrix =
       Eigen::Quaternionf(pose.orientation.w, pose.orientation.x,
@@ -95,7 +95,10 @@ visualization_msgs::MarkerArray GetAxesMarkerArray(
   z_axis.scale.x = z_axis.scale.y = std::max(scale * 0.1, 0.01);
   z_axis.scale.z = scale;
 
-  // Z axis orientation
+  // Z axis orientation, which has the same orientation as the given pose.
+  z_axis.pose.orientation = pose.orientation;
+
+  // Z axis position shifting
   z_axis.pose.position = pose.position;
   Eigen::Vector3f z_position =
       Eigen::Vector3f(pose.position.x, pose.position.y, pose.position.z) +

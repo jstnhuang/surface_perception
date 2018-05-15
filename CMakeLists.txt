@@ -40,6 +40,7 @@ find_package(PCL REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES
+    surface_perception_axes_marker
     surface_perception_segmentation
     surface_perception_shape_extraction
     surface_perception_surface_finder
@@ -131,6 +132,7 @@ target_link_libraries(surface_perception_demo
 
 ## Mark executables and/or libraries for installation
 install(TARGETS
+  surface_perception_axes_marker
   surface_perception_demo
   surface_perception_segmentation
   surface_perception_shape_extraction
